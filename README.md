@@ -18,6 +18,7 @@
 |                                                                                                                                                                     |                                                                                                                                                                     | 초기구성                                                                                                                                                                |                                                                                                                                                                     |
 
 ## 3. ERD
+<img src="https://github.com/busanitcenter-team3-shopping/shop_backend/blob/dev/src/main/resources/static/img/erd.png?raw=true"/>
 
 ## 4. 사용 기술
 | Language                                                                                                       | Backend                                                                                                                 | Frontend                                                                                             | Database                                                                                                 | Deploy                                                                                                                   | Tool                                                                                                   |

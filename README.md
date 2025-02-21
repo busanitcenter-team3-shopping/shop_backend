@@ -2,6 +2,7 @@
 
 <img src="https://github.com/busanitcenter-team3-shopping/shop_backend/blob/dev/src/main/resources/static/img/logo.png?raw=true " width="300"/>
 ---
+
 ## 1. 프로젝트 소개
 - **프로젝트 명** : 중고거래
 - **기간** : 25.02.10 ~ {(프론트 : 25.02.10 ~ 25.02.20), (백엔드 : 25.02.21 ~ )}

@@ -1,6 +1,6 @@
 # 프로젝트
-    
 
+<img src="https://github.com/busanitcenter-team3-shopping/shop_backend/blob/dev/src/main/resources/static/img/logo.png?raw=true " width="300"/>
 ---
 ## 1. 프로젝트 소개
 - **프로젝트 명** : 중고거래

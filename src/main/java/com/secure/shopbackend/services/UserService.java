@@ -12,7 +12,7 @@ import java.util.List;
 public class UserService{
 
     @Autowired
-    private UserRepository getUserRepository;
+    private UserRepository userRepository;
 
 
     // 회원가입
@@ -24,28 +24,29 @@ public class UserService{
         createdUser.setPhone(user.getPhone());
         createdUser.setCreated_at(LocalDateTime.now());
 
-        getUserRepository.save(createdUser);
+        userRepository.save(createdUser);
         return createdUser;
     }
 
     // 전체회원 조회
     public List<User> getAllUsers() {
-        return getUserRepository.findAll();
+        return userRepository.findAll();
     }
 
     // 회원 수정
-    public User updateUser(User user, Long userid, String password, String phone, String name) {
-        getUserRepository.findById(userid);
+    public User updateUser(Long userid, String password, String phone, String name) {
+        User user = userRepository.findById(userid)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을수 없습니다."));
         user.setName(name);
         user.setPassword(password);
         user.setPhone(phone);
         user.setUpdated_at(LocalDateTime.now());
-        User updatedUser = getUserRepository.save(user);
-        return updatedUser;
+
+        return userRepository.save(user);
     }
 
     // 회원 삭제
     public void deleteUser(Long userid) {
-        getUserRepository.deleteById(userid);
+        userRepository.deleteById(userid);
     }
 }

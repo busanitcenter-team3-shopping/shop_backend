@@ -3,10 +3,12 @@ package com.secure.shopbackend.controller;
 import com.secure.shopbackend.dtos.User;
 import com.secure.shopbackend.repositories.UserRepository;
 import com.secure.shopbackend.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,14 +23,26 @@ public class UserController {
     private UserRepository userRepository;
 
     @PostMapping("/createuser")
-    public User createUser(@RequestBody User user) {
-        return userService.createUser(user);
+    public ResponseEntity<?> createUser(@Valid @RequestBody User user, BindingResult bindingResult) {
+
+        // dto message에 남긴 말들
+        if(bindingResult.hasErrors()) {
+            String error = bindingResult.getFieldError().getDefaultMessage();
+            return ResponseEntity.badRequest().body(error);
+        }
+
+        // 이메일 중복
+        if(userRepository.findByEmail(user.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("동일한 이메일이 존재합니다.");
+        }
+        userService.createUser(user);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/updateuser/{id}")
     public User updateUser(@RequestBody User newUser, @PathVariable Long id, String password, String phone, String name) {
         Optional<User> user = userRepository.findById(id);
-        return userService.updateUser(newUser, id, password, phone, name);
+        return userService.updateUser(id, password, phone, name);
     }
 
     @GetMapping("/userlist")

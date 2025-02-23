@@ -3,6 +3,7 @@ package com.secure.shopbackend.services;
 import com.secure.shopbackend.dtos.User;
 import com.secure.shopbackend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,18 +15,24 @@ public class UserService{
     @Autowired
     private UserRepository userRepository;
 
+//    @Autowired
+//    private PasswordEncoder passwordEncoder;
 
     // 회원가입
     public User createUser(User user) {
         User createdUser = new User();
-        createdUser.setName(user.getName());
-        createdUser.setEmail(user.getEmail());
-        createdUser.setPassword(user.getPassword());
-        createdUser.setPhone(user.getPhone());
-        createdUser.setCreated_at(LocalDateTime.now());
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        } else {
+            createdUser.setName(user.getName());
+            createdUser.setEmail(user.getEmail());
+            createdUser.setPassword(user.getPassword());
+            createdUser.setPhone(user.getPhone());
+            createdUser.setCreated_at(LocalDateTime.now());
 
-        userRepository.save(createdUser);
-        return createdUser;
+            userRepository.save(createdUser);
+            return createdUser;
+        }
     }
 
     // 전체회원 조회
@@ -34,12 +41,12 @@ public class UserService{
     }
 
     // 회원 수정
-    public User updateUser(Long userid, String password, String phone, String name) {
+    public User updateUser(Long userid, User newUser) {
         User user = userRepository.findById(userid)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을수 없습니다."));
-        user.setName(name);
-        user.setPassword(password);
-        user.setPhone(phone);
+        user.setName(newUser.getName());
+        user.setPassword(newUser.getPassword());
+        user.setPhone(newUser.getPhone());
         user.setUpdated_at(LocalDateTime.now());
 
         return userRepository.save(user);
@@ -47,6 +54,9 @@ public class UserService{
 
     // 회원 삭제
     public void deleteUser(Long userid) {
+        if(!userRepository.existsById(userid)) {
+            throw new RuntimeException("유저를 찾을수 없습니다.");
+        }
         userRepository.deleteById(userid);
     }
 }

@@ -22,6 +22,7 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    // 회원가입
     @PostMapping("/createuser")
     public ResponseEntity<?> createUser(@Valid @RequestBody User user, BindingResult bindingResult) {
 
@@ -30,26 +31,32 @@ public class UserController {
             String error = bindingResult.getFieldError().getDefaultMessage();
             return ResponseEntity.badRequest().body(error);
         }
-
-        // 이메일 중복
-        if(userRepository.findByEmail(user.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("동일한 이메일이 존재합니다.");
+        try {
+            userService.createUser(user);
+            return ResponseEntity.ok().build();
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        userService.createUser(user);
-        return ResponseEntity.ok().build();
     }
 
+    // 회원 수정
     @PutMapping("/updateuser/{id}")
-    public User updateUser(@RequestBody User newUser, @PathVariable Long id, String password, String phone, String name) {
-        Optional<User> user = userRepository.findById(id);
-        return userService.updateUser(id, password, phone, name);
+    public ResponseEntity<?> updateUser(@RequestBody User newUser, @PathVariable Long id) {
+        try {
+            User updatedUser = userService.updateUser(id, newUser);
+            return ResponseEntity.ok().body(updatedUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
+    // 회원 조회
     @GetMapping("/userlist")
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
+    // 회원 삭제
     @DeleteMapping("/delete/{id}")
     public void deleteUser(@PathVariable Long id) {
         Optional<User> user = userRepository.findById(id);

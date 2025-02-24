@@ -10,8 +10,9 @@ public class LoginResponse {
     private String name;
     private String email;
 
-    public LoginResponse(String jwtToken, String email) {
+    public LoginResponse(String jwtToken, String email, String name) {
         this.jwtToken = jwtToken;
         this.email = email;
+        this.name = name;
     }
 }

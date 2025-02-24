@@ -5,7 +5,6 @@ import com.secure.shopbackend.repositories.UserRepository;
 import com.secure.shopbackend.security.jwt.JwtUtils;
 import com.secure.shopbackend.security.request.LoginRequest;
 import com.secure.shopbackend.security.response.LoginResponse;
-import com.secure.shopbackend.security.services.UserDetailsImpl;
 import com.secure.shopbackend.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,9 +44,6 @@ public class UserController {
 
 //    @Autowired
 //    private UserDetailsImpl userDetails;
-
-    @Autowired
-    private LoginRequest loginRequest;
 
     // 회원가입
     @PostMapping("/createuser")
@@ -92,11 +88,11 @@ public class UserController {
 
     //로그인
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User user) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         Authentication authentication;
         try {
             authentication = authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(LoginRequest.getName(), LoginRequest.getEmail(), LoginRequest.getPassword()));
+                    .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         } catch (AuthenticationException exception) {
             Map<String, Object> map = new HashMap<>();
             map.put("message", "Bad credentials");
@@ -119,10 +115,10 @@ public class UserController {
                 .collect(Collectors.toList());
 
         //유저이름 유저권한 jwt 토큰으로 새 객체를 만듬
-        LoginResponse response = new LoginResponse(jwtToken, userDetails.getUsername(), user.getEmail());
+        LoginResponse response = new LoginResponse(jwtToken, loginRequest.getEmail());
 
         // response body 로 JWT 토큰을 포함한 response 객체로 리턴
         return ResponseEntity.ok(response);
     }
-    }
+
 }

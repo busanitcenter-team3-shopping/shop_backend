@@ -25,7 +25,8 @@ public class User {
     private Long userId;
 
     @NotBlank
-    private String name;
+    @Column(name = "name")
+    private String username;
 
     @NotBlank
     private String email;

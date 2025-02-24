@@ -25,7 +25,7 @@ public class UserService{
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         } else {
-            createdUser.setName(user.getName());
+            createdUser.setUsername(user.getUsername());
             createdUser.setEmail(user.getEmail());
 //            createdUser.setPassword(user.getPassword());
             createdUser.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -46,7 +46,7 @@ public class UserService{
     public User updateUser(Long userid, User newUser) {
         User user = userRepository.findById(userid)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을수 없습니다."));
-        user.setName(newUser.getName());
+        user.setUsername(newUser.getUsername());
         user.setPassword(newUser.getPassword());
         user.setPhone(newUser.getPhone());
         user.setUpdated_at(LocalDateTime.now());

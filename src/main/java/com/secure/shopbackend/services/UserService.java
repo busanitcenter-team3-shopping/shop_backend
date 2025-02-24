@@ -4,6 +4,7 @@ import com.secure.shopbackend.dtos.User;
 import com.secure.shopbackend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,8 +16,8 @@ public class UserService{
     @Autowired
     private UserRepository userRepository;
 
-//    @Autowired
-//    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // 회원가입
     public User createUser(User user) {
@@ -26,7 +27,8 @@ public class UserService{
         } else {
             createdUser.setName(user.getName());
             createdUser.setEmail(user.getEmail());
-            createdUser.setPassword(user.getPassword());
+//            createdUser.setPassword(user.getPassword());
+            createdUser.setPassword(passwordEncoder.encode(user.getPassword()));
             createdUser.setPhone(user.getPhone());
             createdUser.setCreated_at(LocalDateTime.now());
 

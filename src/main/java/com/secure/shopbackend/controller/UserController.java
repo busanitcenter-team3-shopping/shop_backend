@@ -115,7 +115,7 @@ public class UserController {
                 .collect(Collectors.toList());
 
         //유저이름 유저권한 jwt 토큰으로 새 객체를 만듬
-        LoginResponse response = new LoginResponse(jwtToken, loginRequest.getEmail(), loginRequest.getName());
+        LoginResponse response = new LoginResponse(jwtToken, loginRequest.getEmail());
 
         // response body 로 JWT 토큰을 포함한 response 객체로 리턴
         return ResponseEntity.ok(response);

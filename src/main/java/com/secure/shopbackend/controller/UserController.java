@@ -97,7 +97,7 @@ public class UserController {
             Map<String, Object> map = new HashMap<>();
             map.put("message", "Bad credentials");
             map.put("status", false);
-            return new ResponseEntity<Object>(map, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<Object>(map, HttpStatus.UNAUTHORIZED);
         }
 
         // 시큐리티 인증됨
@@ -115,7 +115,7 @@ public class UserController {
                 .collect(Collectors.toList());
 
         //유저이름 유저권한 jwt 토큰으로 새 객체를 만듬
-        LoginResponse response = new LoginResponse(jwtToken, loginRequest.getEmail());
+        LoginResponse response = new LoginResponse(jwtToken, loginRequest.getEmail(), loginRequest.getName());
 
         // response body 로 JWT 토큰을 포함한 response 객체로 리턴
         return ResponseEntity.ok(response);

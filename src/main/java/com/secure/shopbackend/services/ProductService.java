@@ -38,7 +38,7 @@ public class ProductService {
         product.setPrice(productDto.getPrice());
 
 
-        product.setImage(image);
+//        product.setImage(image);
 
         // (추가적으로 user, category 정보 설정 가능)
 

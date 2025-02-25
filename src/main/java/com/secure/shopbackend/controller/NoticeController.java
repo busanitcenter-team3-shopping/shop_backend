@@ -18,32 +18,6 @@ public class NoticeController {
     @Autowired
     private NoticeService noticeService;
 
-    // 공지사항 생성
-    @PostMapping("/createnotice")
-    public ResponseEntity<?> createNotice(@Valid @RequestBody Notice notice, BindingResult bindingResult) {
-
-        if (bindingResult.hasErrors()) {
-            String error = bindingResult.getFieldError().getDefaultMessage();
-            return ResponseEntity.badRequest().body(error);
-        }
-        try {
-            noticeService.createNotice(notice);
-            return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    // 공지사항 수정
-    @PutMapping("/updatenotice/{id}")
-    public ResponseEntity<?> updateNotice(@RequestBody Notice notice, @PathVariable Long id) {
-        try {
-            Notice updatedNotice = noticeService.updateNotice(id, notice);
-            return ResponseEntity.ok(updatedNotice);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
 
     // 공지사항 전체 조회
     @GetMapping("/noticelist")
@@ -52,14 +26,4 @@ public class NoticeController {
         return ResponseEntity.ok(notices);
     }
 
-    // 공지사항 삭제
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteNotice(@PathVariable Long id) {
-        try {
-            noticeService.deleteNotice(id);
-            return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
 }

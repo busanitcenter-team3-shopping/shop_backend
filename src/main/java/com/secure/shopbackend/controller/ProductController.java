@@ -16,6 +16,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/product")
@@ -27,13 +29,13 @@ public class ProductController {
     //등록
 //    @Transactional
 //    @PostMapping("/create")
-//    public ResponseEntity<?> createProduct(@AuthenticationPrincipal UserDetails userDetails, @RequestParam(value = "file") MultipartFile file, @RequestParam Product product) {
+//    public ResponseEntity<?> createProduct(@AuthenticationPrincipal UserDetails userDetails, @RequestPart(value = "file") List<MultipartFile> files, @RequestPart Product product) {
 //        if(userDetails == null) {
 //            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 //        }
 //
 //        try {
-//            productService.createProduct(product, file);
+//            productService.createProduct(product, files);
 //        }catch (IllegalArgumentException e) {
 //            return ResponseEntity.badRequest().body(e.getMessage());
 //        } catch (Exception e) {
@@ -43,13 +45,13 @@ public class ProductController {
 //
 //        return ResponseEntity.ok().build();
 //    }
-    @Transactional
+//    @Transactional
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestPart("file") MultipartFile file,
+            @RequestPart("files") List<MultipartFile> files,
             @RequestPart("product") String productJson) {
-
+        System.out.println("정보확인 : " + userDetails);
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -59,8 +61,11 @@ public class ProductController {
 
         try {
             // JSON 문자열을 Product 객체로 변환
+            System.out.println("Received productJson: " + productJson);
+
             product = objectMapper.readValue(productJson, Product.class);
-            productService.createProduct(product, file);
+            System.out.println(product);
+            productService.createProduct(product, files);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Invalid product JSON format: " + e.getMessage());
         }

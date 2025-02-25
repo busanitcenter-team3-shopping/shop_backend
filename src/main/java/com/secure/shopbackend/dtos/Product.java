@@ -46,7 +46,7 @@ public class Product {
     private User user;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "product_id") //DB에 이미지테이블 상품id 외래키 추가
+    @JoinColumn(name = "image_id") //DB에 이미지테이블 상품id 외래키 추가
     private List<Image> images;
 
     @Enumerated(EnumType.STRING)

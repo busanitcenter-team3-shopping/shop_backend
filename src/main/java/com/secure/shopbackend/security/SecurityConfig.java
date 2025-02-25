@@ -42,8 +42,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // 세션 사용 안함
                 http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
-        System.out.println("Security Filter Chain" + authTokenFilter);
-                //.httpBasic(withDefaults());
 
         return http.build();
     }

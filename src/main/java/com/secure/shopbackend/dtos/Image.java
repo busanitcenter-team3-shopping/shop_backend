@@ -1,9 +1,6 @@
 package com.secure.shopbackend.dtos;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -17,6 +14,7 @@ public class Image {
     private Long imageId;
 
     @NotBlank
+    @Column(name = "image_name")
     private String imageName;
 
 

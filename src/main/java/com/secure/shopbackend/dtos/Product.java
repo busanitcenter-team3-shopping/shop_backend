@@ -42,13 +42,13 @@ public class Product {
     private LocalDateTime updated_at;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "product_id") //DB에 이미지테이블 상품id 외래키 추가
     private List<Image> images;
 
-
-
+    @Enumerated(EnumType.STRING)
+    private Category category;
 }

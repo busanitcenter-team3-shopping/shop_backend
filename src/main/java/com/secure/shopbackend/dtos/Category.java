@@ -1,22 +1,27 @@
 package com.secure.shopbackend.dtos;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
-public class Category {
+public enum Category {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "category_id")
-    private Long categoryId;
+  ALL("전체", "📄"),
+  IT("IT", "⚙️"),
+  CLOTHING("의류", "👕"),
+  STATIONERY("문구", "📜"),
+  INSTRUMENT("악기", "🎻");
 
-    @NotBlank
-    private String name;
+  private final String name;
+  private final String icon;
+
+  Category(String name, String icon) {
+    this.name = name;
+    this.icon = icon;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getIcon() {
+    return icon;
+  }
 }

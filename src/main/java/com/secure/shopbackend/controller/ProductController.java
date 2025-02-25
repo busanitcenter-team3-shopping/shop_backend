@@ -1,11 +1,17 @@
 package com.secure.shopbackend.controller;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secure.shopbackend.dtos.Product;
 import com.secure.shopbackend.services.ProductService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,26 +25,46 @@ public class ProductController {
     private ProductService productService;
 
     //등록
-    @PostMapping("/create")
+//    @Transactional
+//    @PostMapping("/create")
+//    public ResponseEntity<?> createProduct(@AuthenticationPrincipal UserDetails userDetails, @RequestParam(value = "file") MultipartFile file, @RequestParam Product product) {
+//        if(userDetails == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//        }
+//
+//        try {
+//            productService.createProduct(product, file);
+//        }catch (IllegalArgumentException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        } catch (Exception e) {
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                .body("서버 오류가 발생했습니다. 다시 시도해주세요.");
+//    }
+//
+//        return ResponseEntity.ok().build();
+//    }
+    @Transactional
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(
-            @RequestPart("product") @Valid Product productDto,
-            BindingResult bindingResult,
-            @RequestPart("image") MultipartFile imageFile) {
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestPart("file") MultipartFile file,
+            @RequestPart("product") String productJson) {
 
-        if (bindingResult.hasErrors()) {
-            String error = bindingResult.getFieldError().getDefaultMessage();
-            return ResponseEntity.badRequest().body(error);
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Product product;
 
         try {
-            Product product = productService.createProduct(productDto, imageFile);
-            return ResponseEntity.ok(product);
+            // JSON 문자열을 Product 객체로 변환
+            product = objectMapper.readValue(productJson, Product.class);
+            productService.createProduct(product, file);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body("Invalid product JSON format: " + e.getMessage());
         }
+
+        return ResponseEntity.ok().build();
     }
-
-
-
-
 }

@@ -1,6 +1,7 @@
 package com.secure.shopbackend.dtos;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -45,8 +46,8 @@ public class Product {
     @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "image_id") //DB에 이미지테이블 상품id 외래키 추가
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Image> images;
 
     @Enumerated(EnumType.STRING)

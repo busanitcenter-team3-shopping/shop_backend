@@ -14,6 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
@@ -44,6 +45,16 @@ public class UserController {
 
 //    @Autowired
 //    private UserDetailsImpl userDetails;
+
+    // 유저정보 가져오기
+    @GetMapping
+    public ResponseEntity<?> getUserDetails(@AuthenticationPrincipal UserDetails userDetails) {
+        if(userDetails == null) {
+            System.out.println("userDetails is null");
+        }
+        Optional<User> user = userRepository.findByUsername(userDetails.getUsername());
+        return ResponseEntity.ok(user);
+    }
 
     // 회원가입
     @PostMapping("/createuser")

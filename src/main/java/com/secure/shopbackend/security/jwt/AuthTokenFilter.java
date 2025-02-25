@@ -60,7 +60,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                     User user = userRepository.findByUsername(username)
                             .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            user, null, Collections.emptyList()); // 권한 추가 가능
+                            user, null, user.getAuthorities()); // 권한 추가 가능
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }

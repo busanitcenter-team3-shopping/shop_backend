@@ -8,6 +8,7 @@ import com.secure.shopbackend.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,7 +29,8 @@ public class ProductService {
     private ImageRepository imageRepository;
 
     // 상품 등록: 상품 정보와 이미지 파일을 받아서 처리
-    public Product createProduct(Product productDto, MultipartFile imageFile) throws Exception {
+    @Transactional
+    public Product createProduct(Product productDto, List<MultipartFile> imageFiles) throws Exception {
 
         Product product = new Product();
         product.setTitle(productDto.getTitle());
@@ -35,18 +38,25 @@ public class ProductService {
         product.setPrice(productDto.getPrice());
         product.setCategory(productDto.getCategory());
 
-        product.setUser(productDto.getUser());
+        //product.setUser(productDto.getUser());
 
 
-//        product.setImage(image);
+        List<Image> imageList = new ArrayList<>();
 
-        Image image = new Image();
-        String fileName = storeFile(imageFile);
-        image.setImageName(fileName);
-        imageRepository.save(image);
+        for (MultipartFile imageFile : imageFiles) {
+            String fileName = storeFile(imageFile);
+
+            Image image = new Image();
+            image.setImageName(fileName);
+            image.setProduct(product);
+            imageList.add(image);
+        }
 
 
-        product.setImages(List.of(image));
+        imageRepository.saveAll(imageList);
+
+        product.setImages(imageList);
+
 
         return productRepository.save(product);
     }

@@ -40,6 +40,7 @@ public class ProductService {
 
         //product.setUser(productDto.getUser());
 
+
         List<Image> imageList = new ArrayList<>();
 
         for (MultipartFile imageFile : imageFiles) {
@@ -55,6 +56,7 @@ public class ProductService {
         imageRepository.saveAll(imageList);
 
         product.setImages(imageList);
+
 
         return productRepository.save(product);
     }

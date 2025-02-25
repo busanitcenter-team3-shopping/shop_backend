@@ -37,10 +37,14 @@ public class ProductService {
 
         product.setUser(productDto.getUser());
 
+
+//        product.setImage(image);
+
         Image image = new Image();
         String fileName = storeFile(imageFile);
         image.setImageName(fileName);
         imageRepository.save(image);
+
 
         product.setImages(List.of(image));
 

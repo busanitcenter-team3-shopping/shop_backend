@@ -37,6 +37,7 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 추가
                 .authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/", "/**","/user/**").permitAll()
                         .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화

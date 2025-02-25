@@ -28,24 +28,29 @@ public class JwtUtils {
     @Value("${spring.app.jwtExpirationMs}")
     private int jwtExpirationMs;
 
-    // jwt 토큰을 헤더에서 가져옴
+    // HTTP 요청 헤더에서 JWT 토큰 추출
     public String getJwtFromHeader(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         logger.debug("Authorization Header: {}", bearerToken);
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7); // Remove Bearer prefix
+            return bearerToken.substring(7); // "Bearer " 접두사 제거
         }
         return null;
     }
 
-    // jwt 토큰 생성
+    // JWT 토큰 생성
     public String generateTokenFromUsername(UserDetails userDetails) {
         String username = userDetails.getUsername();
-        String roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
+        // 사용자의 권한들을 콤마(,)로 연결하여 문자열로 생성
+        String roles = userDetails.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
         return Jwts.builder()
-                .subject(username)  // 이름 sub에 추가
-                .issuedAt(new Date())
-                .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .setSubject(username)
+                .claim("role", roles)       // role 클레임 추가했습니다.
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key())
                 .compact();
     }
@@ -54,13 +59,24 @@ public class JwtUtils {
     public String getUserNameFromJwtToken(String token) {
         return Jwts.parser()
                 .verifyWith((SecretKey) key())
-                .build().parseSignedClaims(token)
+                .build()
+                .parseSignedClaims(token)
                 .getPayload().getSubject();
     }
 
-    // 비밀키 값
-    private Key key() {
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+    // JWT 토큰에서 "role" 클레임을 추출하는 메서드
+    public String getRoleFromJwtToken(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith((SecretKey) key())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("role", String.class);
+        } catch (Exception e) {
+            logger.error("Error extracting role from JWT token: {}", e.getMessage());
+            return null;
+        }
     }
 
     // jwt 토큰이 유효한지 검사
@@ -79,5 +95,10 @@ public class JwtUtils {
             logger.error("JWT claims string is empty: {}", e.getMessage());
         }
         return false;
+    }
+
+    // 비밀키 생성
+    private Key key() {
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 }

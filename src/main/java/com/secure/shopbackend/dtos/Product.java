@@ -52,4 +52,6 @@ public class Product {
 
     @Enumerated(EnumType.STRING)
     private Category category;
+
+    private String status;
 }

@@ -3,6 +3,8 @@ package com.secure.shopbackend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secure.shopbackend.dtos.Product;
+import com.secure.shopbackend.dtos.User;
+import com.secure.shopbackend.repositories.UserRepository;
 import com.secure.shopbackend.services.ProductService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -27,6 +29,8 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
+  @Autowired
+  private UserRepository userRepository;
 
     //등록
 //    @Transactional
@@ -58,7 +62,7 @@ public class ProductController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
+        String username = userDetails.getUsername();
         ObjectMapper objectMapper = new ObjectMapper();
         Product product;
 
@@ -68,7 +72,12 @@ public class ProductController {
 
             product = objectMapper.readValue(productJson, Product.class);
             System.out.println(product);
+
+            User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User Not Found"));
+            System.out.println(user);
+            product.setUser(user);
             productService.createProduct(product, files);
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Invalid product JSON format: " + e.getMessage());
         }

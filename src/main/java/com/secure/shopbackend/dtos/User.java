@@ -1,5 +1,7 @@
 package com.secure.shopbackend.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -53,6 +55,7 @@ public class User implements UserDetails {
     private LocalDateTime updated_at;
 
     @OneToMany(mappedBy = "user",fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
+    @JsonIgnoreProperties("user")
     private List<Product> products;
 
     @Override

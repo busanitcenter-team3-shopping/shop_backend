@@ -1,6 +1,8 @@
 package com.secure.shopbackend.dtos;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -42,9 +44,14 @@ public class Product {
     @UpdateTimestamp
     private LocalDateTime updated_at;
 
+    @JsonIgnoreProperties
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = true)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+//    public Long getUserId(Long user) {
+//        return user;
+//    }
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -54,4 +61,7 @@ public class Product {
     private Category category;
 
     private String status;
+
+//    public void setUser(Long userId) {
+//    }
 }

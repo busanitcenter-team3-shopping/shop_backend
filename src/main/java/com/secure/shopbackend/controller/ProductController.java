@@ -52,7 +52,7 @@ public class ProductController {
 //        return ResponseEntity.ok().build();
 //    }
 
-    @Transactional
+    //@Transactional
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -62,7 +62,7 @@ public class ProductController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        String username = userDetails.getUsername();
+
         ObjectMapper objectMapper = new ObjectMapper();
         Product product;
 
@@ -73,10 +73,7 @@ public class ProductController {
             product = objectMapper.readValue(productJson, Product.class);
             System.out.println(product);
 
-            User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User Not Found"));
-            System.out.println(user);
-            product.setUser(user);
-            productService.createProduct(product, files);
+            productService.createProduct(userDetails, product, files);
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Invalid product JSON format: " + e.getMessage());

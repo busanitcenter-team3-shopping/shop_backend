@@ -11,7 +11,9 @@ import com.secure.shopbackend.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,14 +47,20 @@ public class ProductService {
 
     // 상품 등록: 상품 정보와 이미지 파일을 받아서 처리
 //    @Transactional
-    public Product createProduct(Product productDto, List<MultipartFile> imageFiles) throws Exception {
+    public Product createProduct(@AuthenticationPrincipal UserDetails userDetails, Product productDto, List<MultipartFile> imageFiles) throws Exception {
+
+        String username = userDetails.getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User Not Found"));
+//        Long userId = userRepository.findByUserId(user.getUserId());
 
         Product product = new Product();
         product.setTitle(productDto.getTitle());
         product.setDescription(productDto.getDescription());
         product.setPrice(productDto.getPrice());
         product.setCategory(productDto.getCategory());
-        product.setUser(productDto.getUser());
+        product.setUser(user);
+
+        product = productRepository.save(product);
 
         List<Image> imageList = new ArrayList<>();
 

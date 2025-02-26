@@ -1,21 +1,18 @@
 package com.secure.shopbackend.services;
 
 
+import com.secure.shopbackend.dtos.Category;
 import com.secure.shopbackend.dtos.Image;
 import com.secure.shopbackend.dtos.Product;
 import com.secure.shopbackend.dtos.User;
 import com.secure.shopbackend.repositories.ImageRepository;
 import com.secure.shopbackend.repositories.ProductRepository;
 import com.secure.shopbackend.repositories.UserRepository;
-import com.secure.shopbackend.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -89,5 +86,14 @@ public class ProductService {
         Path filePath = Paths.get(uploadDir, fileName);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
         return fileName;
+    }
+
+    public List<Product> getProducts(Category category, String search) {
+        if (category == Category.ALL) {
+            return productRepository.findByTitleContainingIgnoreCase(search);
+        } else {
+            return productRepository.findByCategoryAndTitleContainingIgnoreCase(category, search);
+        }
+
     }
 }

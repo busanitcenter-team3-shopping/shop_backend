@@ -37,7 +37,8 @@ public class ProductController {
     @Autowired
     private ProductRepository productRepository;
 
-    //등록
+
+  //등록
 //    @Transactional
 //    @PostMapping("/create")
 //    public ResponseEntity<?> createProduct(@AuthenticationPrincipal UserDetails userDetails, @RequestPart(value = "file") List<MultipartFile> files, @RequestPart Product product) {
@@ -86,7 +87,6 @@ public class ProductController {
 
         return ResponseEntity.ok().build();
     }
-
 //    //상품 조회
 //    @GetMapping
 //    public List<Product> getAllProducts() {

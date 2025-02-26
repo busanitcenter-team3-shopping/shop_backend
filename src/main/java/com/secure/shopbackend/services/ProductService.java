@@ -58,6 +58,7 @@ public class ProductService {
         product.setDescription(productDto.getDescription());
         product.setPrice(productDto.getPrice());
         product.setCategory(productDto.getCategory());
+        product.setStatus("판매중");
         product.setUser(user);
 
         product = productRepository.save(product);

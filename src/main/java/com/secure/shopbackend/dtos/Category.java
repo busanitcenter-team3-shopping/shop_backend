@@ -1,6 +1,8 @@
 package com.secure.shopbackend.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Category {
 
   ALL("전체", "📄"),

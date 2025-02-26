@@ -2,12 +2,15 @@ package com.secure.shopbackend.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.secure.shopbackend.dtos.Category;
 import com.secure.shopbackend.dtos.Product;
 import com.secure.shopbackend.dtos.User;
+import com.secure.shopbackend.repositories.ProductRepository;
 import com.secure.shopbackend.repositories.UserRepository;
 import com.secure.shopbackend.services.ProductService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,6 +34,8 @@ public class ProductController {
     private ProductService productService;
   @Autowired
   private UserRepository userRepository;
+    @Autowired
+    private ProductRepository productRepository;
 
     //등록
 //    @Transactional
@@ -81,4 +86,20 @@ public class ProductController {
 
         return ResponseEntity.ok().build();
     }
+
+//    //상품 조회
+//    @GetMapping
+//    public List<Product> getAllProducts() {
+//        return productRepository.findAll();
+//    }
+
+    @GetMapping
+    public ResponseEntity<List<Product>> getProducts(
+            @RequestParam(required = false, defaultValue = "ALL") Category category,
+            @RequestParam(required = false, defaultValue = "") String search) {
+
+        List<Product> products = productService.getProducts(category, search);
+        return ResponseEntity.ok(products);
+    }
+
 }

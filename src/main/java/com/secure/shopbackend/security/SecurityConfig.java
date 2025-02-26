@@ -37,6 +37,7 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 추가
                 .authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/admin/login").permitAll() // 관리자 로그인은 누구나 접근 가능
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/", "/**","/user/**").permitAll()
                         .anyRequest().authenticated())

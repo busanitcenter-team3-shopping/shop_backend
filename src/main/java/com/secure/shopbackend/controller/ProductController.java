@@ -4,6 +4,7 @@ package com.secure.shopbackend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secure.shopbackend.dtos.Product;
 import com.secure.shopbackend.dtos.User;
+import com.secure.shopbackend.repositories.ProductRepository;
 import com.secure.shopbackend.repositories.UserRepository;
 import com.secure.shopbackend.services.ProductService;
 import jakarta.transaction.Transactional;
@@ -31,8 +32,10 @@ public class ProductController {
     private ProductService productService;
   @Autowired
   private UserRepository userRepository;
+  @Autowired
+  private ProductRepository productRepository;
 
-    //등록
+  //등록
 //    @Transactional
 //    @PostMapping("/create")
 //    public ResponseEntity<?> createProduct(@AuthenticationPrincipal UserDetails userDetails, @RequestPart(value = "file") List<MultipartFile> files, @RequestPart Product product) {
@@ -81,4 +84,10 @@ public class ProductController {
 
         return ResponseEntity.ok().build();
     }
+
+    // 상품 전체 출력
+  @GetMapping
+  public List<Product> getAllProducts() {
+      return productRepository.findAll();
+  }
 }

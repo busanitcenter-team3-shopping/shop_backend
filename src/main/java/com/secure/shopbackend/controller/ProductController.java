@@ -44,28 +44,7 @@ public class ProductController {
     @Autowired
     private ProductRepository productRepository;
 
-
-  //등록
-//    @Transactional
-//    @PostMapping("/create")
-//    public ResponseEntity<?> createProduct(@AuthenticationPrincipal UserDetails userDetails, @RequestPart(value = "file") List<MultipartFile> files, @RequestPart Product product) {
-//        if(userDetails == null) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-//        }
-//
-//        try {
-//            productService.createProduct(product, files);
-//        }catch (IllegalArgumentException e) {
-//            return ResponseEntity.badRequest().body(e.getMessage());
-//        } catch (Exception e) {
-//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                .body("서버 오류가 발생했습니다. 다시 시도해주세요.");
-//    }
-//
-//        return ResponseEntity.ok().build();
-//    }
-
-    //@Transactional
+    // 상품 등록
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(
             @AuthenticationPrincipal UserDetails userDetails,

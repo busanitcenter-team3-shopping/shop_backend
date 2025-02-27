@@ -49,10 +49,6 @@ public class Product {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-//    public Long getUserId(Long user) {
-//        return user;
-//    }
-
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Image> images;
@@ -62,6 +58,4 @@ public class Product {
 
     private String status;
 
-//    public void setUser(Long userId) {
-//    }
 }

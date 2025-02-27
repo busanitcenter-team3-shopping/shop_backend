@@ -48,7 +48,6 @@ public class ProductService {
 
         String username = userDetails.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User Not Found"));
-//        Long userId = userRepository.findByUserId(user.getUserId());
 
         Product product = new Product();
         product.setTitle(productDto.getTitle());

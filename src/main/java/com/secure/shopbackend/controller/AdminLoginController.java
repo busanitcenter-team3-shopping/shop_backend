@@ -27,6 +27,7 @@ public class AdminLoginController {
     @Autowired
     private PasswordEncoder passwordEncoder;  // SecurityConfig에서 BCryptPasswordEncoder Bean 등록되어 있음
 
+    // 관리자 로그인
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Admin loginRequest) {
         try {

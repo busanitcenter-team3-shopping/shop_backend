@@ -9,6 +9,7 @@ import java.util.Map;
 @RestController
 public class EnumController {
 
+  // 카테고리
   @GetMapping("/enum")
   public Category[] getCategories() {
     return Category.values();

@@ -47,7 +47,9 @@ public class UserService{
         User user = userRepository.findById(userid)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을수 없습니다."));
         user.setUsername(newUser.getUsername());
-        user.setPassword(newUser.getPassword());
+        if (newUser.getPassword() != null && !newUser.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(newUser.getPassword()));
+        }
         user.setPhone(newUser.getPhone());
         user.setUpdated_at(LocalDateTime.now());
 

@@ -8,5 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface AdminRepository extends JpaRepository<Admin, Long> {
+    // 관리자 이메일로 찾기
     Optional<Admin> findByEmail(String email);
 }

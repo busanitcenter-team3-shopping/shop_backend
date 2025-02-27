@@ -8,10 +8,14 @@ import com.secure.shopbackend.dtos.User;
 import com.secure.shopbackend.repositories.ProductRepository;
 import com.secure.shopbackend.repositories.UserRepository;
 import com.secure.shopbackend.services.ProductService;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +27,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -79,6 +86,27 @@ public class ProductController {
 
         List<Product> products = productService.getProducts(category, search);
         return ResponseEntity.ok(products);
+    }
+
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
+    @GetMapping("/images/{imageName}")
+    public ResponseEntity<Resource> getImage(@PathVariable String imageName) {
+        try {
+            Path imagePath = Paths.get(uploadDir + imageName);
+            Resource image = new UrlResource(imagePath.toUri());
+
+            if (image.exists() || image.isReadable()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_PNG)
+                        .body(image);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (MalformedURLException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
 }

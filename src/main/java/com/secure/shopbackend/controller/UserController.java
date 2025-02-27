@@ -97,39 +97,4 @@ public class UserController {
         userService.deleteUser(id);
     }
 
-    //로그인
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        Authentication authentication;
-        try {
-            authentication = authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        } catch (AuthenticationException exception) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("message", "Bad credentials");
-            map.put("status", false);
-            return new ResponseEntity<Object>(map, HttpStatus.UNAUTHORIZED);
-        }
-
-        // 시큐리티 인증됨
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // 인증된 유저디테일 가져옴
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-        // 인증된 유저에 jwt 토큰 생성하기
-        String jwtToken = jwtUtils.generateTokenFromUsername(userDetails);
-
-        // 유저의 권한 리스트 가져오기
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
-
-        //유저이름 유저권한 jwt 토큰으로 새 객체를 만듬
-        LoginResponse response = new LoginResponse(jwtToken, loginRequest.getEmail());
-
-        // response body 로 JWT 토큰을 포함한 response 객체로 리턴
-        return ResponseEntity.ok(response);
-    }
-
 }

@@ -4,14 +4,18 @@ import com.secure.shopbackend.dtos.Admin;
 import com.secure.shopbackend.dtos.User;
 import com.secure.shopbackend.repositories.AdminRepository;
 import com.secure.shopbackend.repositories.UserRepository;
+import com.secure.shopbackend.security.services.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -31,6 +35,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     @Autowired
     private AdminRepository adminRepository;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
@@ -57,12 +64,15 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } else {
                     // 일반 사용자 토큰인 경우 기존 로직 수행
-                    User user = userRepository.findByUsername(username)
+                    User user = userRepository.findByEmail(role)
                             .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                    UserDetailsImpl userDetails = UserDetailsImpl.build(user);
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            user, null, user.getAuthorities()); // 권한 추가 가능
+                            userDetails, null, userDetails.getAuthorities()); // 권한 추가 가능
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                    System.out.println(user);
+                    System.out.println(authentication.getDetails());
                 }
             }
 

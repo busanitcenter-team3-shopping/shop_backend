@@ -89,7 +89,7 @@ public class ProductService {
     }
 
     public List<Product> getProducts(Category category, String search) {
-        if (category == Category.ALL) {
+        if (category == null || category.equals(Category.ALL)) {
             return productRepository.findByTitleContainingIgnoreCase(search);
         } else {
             return productRepository.findByCategoryAndTitleContainingIgnoreCase(category, search);

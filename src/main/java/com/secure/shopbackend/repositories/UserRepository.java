@@ -1,6 +1,7 @@
 package com.secure.shopbackend.repositories;
 
 import com.secure.shopbackend.dtos.User;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -14,4 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
 
     Long findByUserId(Long userId);
+
+    String email(@NotBlank String email);
 }

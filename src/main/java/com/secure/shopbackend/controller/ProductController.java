@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,6 +77,13 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 
+    //전체 상품 조회
+    @GetMapping("/main")
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
+
+
   // 카테고리별 상품 받기
     @GetMapping
     public ResponseEntity<List<Product>> getProducts(
@@ -85,6 +93,18 @@ public class ProductController {
         List<Product> products = productService.getProducts(category, search);
         return ResponseEntity.ok(products);
     }
+
+    //유저의 상품 조회
+    @GetMapping("/user-page")
+    public ResponseEntity<List<Product>> getUserProducts(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        List<Product> products = productService.getProductsByUser(userDetails);
+        return ResponseEntity.ok(products);
+    }
+
+
 
     // 해당 주소로 이미지 등록
     @Value("${file.upload-dir}")

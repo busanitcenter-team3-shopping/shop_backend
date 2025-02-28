@@ -138,6 +138,9 @@ public class ProductService {
         }
 
     }
-    
-    
+
+    public List<Product> getProductsByUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User user = userRepository.findByEmail(userDetails.getEmail()).orElseThrow(() -> new RuntimeException("User Not Found"));
+        return productRepository.findByUser_UserId(user.getUserId());
+    }
 }

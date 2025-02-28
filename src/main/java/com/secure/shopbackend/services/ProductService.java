@@ -8,6 +8,7 @@ import com.secure.shopbackend.dtos.User;
 import com.secure.shopbackend.repositories.ImageRepository;
 import com.secure.shopbackend.repositories.ProductRepository;
 import com.secure.shopbackend.repositories.UserRepository;
+import com.secure.shopbackend.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -44,10 +45,10 @@ public class ProductService {
 
     // 상품 등록: 상품 정보와 이미지 파일을 받아서 처리
 //    @Transactional
-    public Product createProduct(@AuthenticationPrincipal UserDetails userDetails, Product productDto, List<MultipartFile> imageFiles) throws Exception {
+    public Product createProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, Product productDto, List<MultipartFile> imageFiles) throws Exception {
 
-        String username = userDetails.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User Not Found"));
+        String email = userDetails.getEmail();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User Not Found"));
 
         Product product = new Product();
         product.setTitle(productDto.getTitle());
@@ -75,6 +76,48 @@ public class ProductService {
         return productRepository.save(product);
     }
 
+    //상품 수정
+    public Product updateProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, List<MultipartFile> imageFiles, Product productDto) throws Exception {
+        String email = userDetails.getEmail();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User Not Found"));
+
+        // 기존 상품
+        Product product = productRepository.findById(productDto.getProductId()).orElseThrow(() -> new RuntimeException("Product Not Found"));
+        if (!product.getUser().getUsername().equals(email)) {
+            throw new RuntimeException("User Not Found");
+        }
+        // 업데이트
+        product.setTitle(productDto.getTitle());
+        product.setDescription(productDto.getDescription());
+        product.setPrice(productDto.getPrice());
+        product.setCategory(productDto.getCategory());
+        product.setStatus("판매중");
+
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            imageRepository.deleteByProduct(product);
+            List<Image> imageList = new ArrayList<>();
+
+            for (MultipartFile imageFile : imageFiles) {
+                String fileName = storeFile(imageFile);
+
+                Image image = new Image();
+                image.setImageName(fileName);
+                image.setProduct(product);
+                imageList.add(image);
+            }
+            imageRepository.saveAll(imageList);
+            product.setImages(imageList);
+        }
+        return productRepository.save(product);
+}
+
+// 상품 상세
+    public Product detailProduct (Long id) {
+
+     return productRepository.findById(id).orElseThrow(() -> new RuntimeException("User Not Found"));
+
+    }
+
     // 파일 저장 로직 (예시)
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -95,4 +138,6 @@ public class ProductService {
         }
 
     }
+    
+    
 }

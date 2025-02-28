@@ -66,11 +66,11 @@ public class User implements UserDetails {
     @Override
     public String toString() {
         return "User{" +
-                "phone='" + phone + '\'' +
-                ", password='" + password + '\'' +
-                ", email='" + email + '\'' +
+                "userId=" + userId +
                 ", username='" + username + '\'' +
-                ", userId=" + userId +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", phone='" + phone + '\'' +
                 '}';
     }
 }

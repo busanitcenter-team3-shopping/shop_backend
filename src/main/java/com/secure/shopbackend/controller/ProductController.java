@@ -76,12 +76,15 @@ public class ProductController {
 
         return ResponseEntity.ok().build();
     }
+
     //전체 상품 조회
     @GetMapping("/main")
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
 
+
+  // 카테고리별 상품 받기
     @GetMapping
     public ResponseEntity<List<Product>> getProducts(
             @RequestParam(required = false, defaultValue = "ALL") Category category,
@@ -102,6 +105,8 @@ public class ProductController {
     }
 
 
+
+    // 해당 주소로 이미지 등록
     @Value("${file.upload-dir}")
     private String uploadDir;
 
@@ -123,4 +128,26 @@ public class ProductController {
         }
     }
 
+    //상세 상품 보기
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getdetailProduct(@PathVariable Long id) {
+      Product product = productService.detailProduct(id);
+      System.out.println(product);
+      return ResponseEntity.ok(product);
+    }
+
+// 상품 수정
+  @PutMapping("/{id}")
+  public ResponseEntity<?> updateProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles,@RequestPart("product") Product productDto) {
+    if (userDetails == null) {
+      System.out.println("userDetails is null");
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+    }
+      try {
+        Product product = productService.updateProduct(userDetails, imageFiles, productDto);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+      return ResponseEntity.ok().build();
+  }
 }

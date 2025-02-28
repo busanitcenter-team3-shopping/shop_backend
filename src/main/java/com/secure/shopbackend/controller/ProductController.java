@@ -7,6 +7,7 @@ import com.secure.shopbackend.dtos.Product;
 import com.secure.shopbackend.dtos.User;
 import com.secure.shopbackend.repositories.ProductRepository;
 import com.secure.shopbackend.repositories.UserRepository;
+import com.secure.shopbackend.security.services.UserDetailsImpl;
 import com.secure.shopbackend.services.ProductService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -31,6 +32,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin("*")
@@ -47,7 +49,7 @@ public class ProductController {
     // 상품 등록
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestPart("files") List<MultipartFile> files,
             @RequestPart("product") String productJson) {
 
@@ -73,12 +75,8 @@ public class ProductController {
 
         return ResponseEntity.ok().build();
     }
-//    //상품 조회
-//    @GetMapping
-//    public List<Product> getAllProducts() {
-//        return productRepository.findAll();
-//    }
 
+  // 카테고리별 상품 받기
     @GetMapping
     public ResponseEntity<List<Product>> getProducts(
             @RequestParam(required = false, defaultValue = "ALL") Category category,
@@ -88,6 +86,7 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
+    // 해당 주소로 이미지 등록
     @Value("${file.upload-dir}")
     private String uploadDir;
 
@@ -109,4 +108,26 @@ public class ProductController {
         }
     }
 
+    //상세 상품 보기
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getdetailProduct(@PathVariable Long id) {
+      Product product = productService.detailProduct(id);
+      System.out.println(product);
+      return ResponseEntity.ok(product);
+    }
+
+// 상품 수정
+  @PutMapping("/{id}")
+  public ResponseEntity<?> updateProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles,@RequestPart("product") Product productDto) {
+    if (userDetails == null) {
+      System.out.println("userDetails is null");
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+    }
+      try {
+        Product product = productService.updateProduct(userDetails, imageFiles, productDto);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+      return ResponseEntity.ok().build();
+  }
 }

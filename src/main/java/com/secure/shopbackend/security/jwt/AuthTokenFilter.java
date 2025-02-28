@@ -58,8 +58,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                     // 관리자 토큰인 경우 AdminRepository를 사용
                     Admin admin = adminRepository.findByEmail(username)
                             .orElseThrow(() -> new RuntimeException("관리자를 찾을 수 없습니다."));
+                    UserDetailsImpl userDetails = UserDetailsImpl.build(admin);
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            admin, null, admin.getAuthorities());
+                            userDetails, null, userDetails.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } else {

@@ -58,4 +58,13 @@ public class Product {
 
     private String status;
 
+    @Override
+    public String toString() {
+        return "Product{" +
+                "price=" + price +
+                ", description='" + description + '\'' +
+                ", title='" + title + '\'' +
+                ", productId=" + productId +
+                '}';
+    }
 }

@@ -8,6 +8,7 @@ import com.secure.shopbackend.dtos.User;
 import com.secure.shopbackend.repositories.ImageRepository;
 import com.secure.shopbackend.repositories.ProductRepository;
 import com.secure.shopbackend.repositories.UserRepository;
+import com.secure.shopbackend.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -44,10 +45,10 @@ public class ProductService {
 
     // 상품 등록: 상품 정보와 이미지 파일을 받아서 처리
 //    @Transactional
-    public Product createProduct(@AuthenticationPrincipal UserDetails userDetails, Product productDto, List<MultipartFile> imageFiles) throws Exception {
+    public Product createProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, Product productDto, List<MultipartFile> imageFiles) throws Exception {
 
-        String username = userDetails.getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User Not Found"));
+        String email = userDetails.getEmail();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User Not Found"));
 
         Product product = new Product();
         product.setTitle(productDto.getTitle());
@@ -94,5 +95,10 @@ public class ProductService {
             return productRepository.findByCategoryAndTitleContainingIgnoreCase(category, search);
         }
 
+    }
+
+    public List<Product> getProductsByUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User user = userRepository.findByEmail(userDetails.getEmail()).orElseThrow(() -> new RuntimeException("User Not Found"));
+        return productRepository.findByUser_UserId(user.getUserId());
     }
 }

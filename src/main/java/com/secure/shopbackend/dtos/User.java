@@ -62,4 +62,15 @@ public class User implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "phone='" + phone + '\'' +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", username='" + username + '\'' +
+                ", userId=" + userId +
+                '}';
+    }
 }

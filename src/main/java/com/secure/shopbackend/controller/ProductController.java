@@ -7,6 +7,7 @@ import com.secure.shopbackend.dtos.Product;
 import com.secure.shopbackend.dtos.User;
 import com.secure.shopbackend.repositories.ProductRepository;
 import com.secure.shopbackend.repositories.UserRepository;
+import com.secure.shopbackend.security.services.UserDetailsImpl;
 import com.secure.shopbackend.services.ProductService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -30,7 +31,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin("*")
@@ -47,7 +50,7 @@ public class ProductController {
     // 상품 등록
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestPart("files") List<MultipartFile> files,
             @RequestPart("product") String productJson) {
 
@@ -73,11 +76,11 @@ public class ProductController {
 
         return ResponseEntity.ok().build();
     }
-//    //상품 조회
-//    @GetMapping
-//    public List<Product> getAllProducts() {
-//        return productRepository.findAll();
-//    }
+    //전체 상품 조회
+    @GetMapping("/main")
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
 
     @GetMapping
     public ResponseEntity<List<Product>> getProducts(
@@ -87,6 +90,17 @@ public class ProductController {
         List<Product> products = productService.getProducts(category, search);
         return ResponseEntity.ok(products);
     }
+
+    //유저의 상품 조회
+    @GetMapping("/user-page")
+    public ResponseEntity<List<Product>> getUserProducts(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        List<Product> products = productService.getProductsByUser(userDetails);
+        return ResponseEntity.ok(products);
+    }
+
 
     @Value("${file.upload-dir}")
     private String uploadDir;

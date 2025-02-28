@@ -1,6 +1,7 @@
 package com.secure.shopbackend.security.services;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.secure.shopbackend.dtos.Admin;
 import com.secure.shopbackend.dtos.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -40,6 +41,18 @@ public class UserDetailsImpl implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
+                List.of(authority) // Wrapping the single authority in a list
+        );
+    }
+
+    public static UserDetailsImpl build(Admin admin) {
+        GrantedAuthority authority = new SimpleGrantedAuthority(admin.getEmail());
+
+        return new UserDetailsImpl(
+                admin.getAdminId(),
+                admin.getAdminName(),
+                admin.getEmail(),
+                admin.getPassword(),
                 List.of(authority) // Wrapping the single authority in a list
         );
     }

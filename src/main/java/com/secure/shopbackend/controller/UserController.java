@@ -104,4 +104,10 @@ public class UserController {
         userService.deleteUser(id);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUser(@PathVariable Long id) {
+        Optional<User> user = userRepository.findById(id);
+        return ResponseEntity.ok(user);
+    }
+
 }

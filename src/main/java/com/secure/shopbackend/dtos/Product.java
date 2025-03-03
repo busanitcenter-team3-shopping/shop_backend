@@ -49,7 +49,7 @@ public class Product {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Image> images;
 

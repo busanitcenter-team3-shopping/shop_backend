@@ -20,7 +20,7 @@ public class Image {
     private String imageName;
 
     @ManyToOne
-    @JoinColumn(name = "product_id") // 외래 키 컬럼 설정
+    @JoinColumn(name = "product_id", nullable = false) // 외래 키 컬럼 설정
     @JsonBackReference
     private Product product;
 }

@@ -144,17 +144,44 @@ public class ProductController {
     }
 
 // 상품 수정
-  @PutMapping("/{id}")
-  public ResponseEntity<?> updateProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestPart(value = "imageFiles", required = false) List<MultipartFile> imageFiles,@RequestPart("product") Product productDto) {
+@PutMapping("/{id}")
+public ResponseEntity<?> updateProduct(
+        @PathVariable Long id,
+        @AuthenticationPrincipal UserDetailsImpl userDetails,
+        @RequestPart("product") String productJson,
+        @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+
     if (userDetails == null) {
-      System.out.println("userDetails is null");
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
-      try {
-        Product product = productService.updateProduct(userDetails, imageFiles, productDto);
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-      return ResponseEntity.ok().build();
-  }
+
+    ObjectMapper objectMapper = new ObjectMapper();
+    Product updatedProduct;
+
+    try {
+        updatedProduct = objectMapper.readValue(productJson, Product.class);
+        Product product = productService.updateProduct(id, userDetails, updatedProduct, files);
+        return ResponseEntity.ok(product);
+    } catch (Exception e) {
+        return ResponseEntity.badRequest().body("에러: " + e.getMessage());
+    }
+}
+
+// 삭제
+@DeleteMapping("/{id}")
+public ResponseEntity<?> deleteProduct(
+        @PathVariable Long id,
+        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+    if (userDetails == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    try {
+        productService.deleteProduct(id, userDetails);
+        return ResponseEntity.ok("삭제 성공");
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+}
 }

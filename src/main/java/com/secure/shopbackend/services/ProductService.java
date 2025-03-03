@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -77,39 +78,43 @@ public class ProductService {
     }
 
     //상품 수정
-    public Product updateProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, List<MultipartFile> imageFiles, Product productDto) throws Exception {
-        String email = userDetails.getEmail();
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User Not Found"));
+    @Transactional
+    public Product updateProduct(Long productId, UserDetailsImpl userDetails, Product updatedProduct, List<MultipartFile> imageFiles) throws Exception {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product Not Found"));
 
-        // 기존 상품
-        Product product = productRepository.findById(productDto.getProductId()).orElseThrow(() -> new RuntimeException("Product Not Found"));
-        if (!product.getUser().getUsername().equals(email)) {
-            throw new RuntimeException("User Not Found");
-        }
-        // 업데이트
-        product.setTitle(productDto.getTitle());
-        product.setDescription(productDto.getDescription());
-        product.setPrice(productDto.getPrice());
-        product.setCategory(productDto.getCategory());
+        product.setTitle(updatedProduct.getTitle());
+        product.setDescription(updatedProduct.getDescription());
+        product.setPrice(updatedProduct.getPrice());
+        product.setCategory(updatedProduct.getCategory());
         product.setStatus("판매중");
 
         if (imageFiles != null && !imageFiles.isEmpty()) {
-            imageRepository.deleteByProduct(product);
-            List<Image> imageList = new ArrayList<>();
+            List<Image> existingImages = new ArrayList<>(product.getImages());
 
+            // 기존 이미지
+            if (!existingImages.isEmpty()) {
+                product.getImages().clear();    // 상품의 이미지 정리
+                productRepository.save(product);    // 상품 저장
+                imageRepository.deleteAll(existingImages);  // 이미지 지우기
+                System.out.println("기존 이미지 삭제 완료");
+            }
+            // 새상품
+            List<Image> newImages = new ArrayList<>();
             for (MultipartFile imageFile : imageFiles) {
                 String fileName = storeFile(imageFile);
 
                 Image image = new Image();
                 image.setImageName(fileName);
                 image.setProduct(product);
-                imageList.add(image);
+                newImages.add(image);
             }
-            imageRepository.saveAll(imageList);
-            product.setImages(imageList);
+
+            product.setImages(newImages);
         }
+
         return productRepository.save(product);
-}
+    }
 
 // 상품 상세
     public Product detailProduct (Long id) {
@@ -142,5 +147,23 @@ public class ProductService {
     public List<Product> getProductsByUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         User user = userRepository.findByEmail(userDetails.getEmail()).orElseThrow(() -> new RuntimeException("User Not Found"));
         return productRepository.findByUser_UserId(user.getUserId());
+    }
+
+    // 상품 삭제
+    public void deleteProduct(Long productId, UserDetailsImpl userDetails) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product Not Found"));
+
+        if (!product.getUser().getEmail().equals(userDetails.getEmail())) {
+            throw new RuntimeException("사ㅣㄱ제할 상품이 없습니다.");
+        }
+
+        if (!product.getImages().isEmpty()) {
+            imageRepository.deleteAll(product.getImages()); // 상품에 있는걸 다 삭제
+            product.getImages().clear();    // 상품의 이미지 정리
+            productRepository.save(product);    
+        }
+        
+        productRepository.delete(product);
     }
 }

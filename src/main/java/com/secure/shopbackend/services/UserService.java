@@ -1,6 +1,8 @@
 package com.secure.shopbackend.services;
 
+import com.secure.shopbackend.dtos.Product;
 import com.secure.shopbackend.dtos.User;
+import com.secure.shopbackend.repositories.ProductRepository;
 import com.secure.shopbackend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +20,9 @@ public class UserService{
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     // 회원가입
     public User createUser(User user) {
@@ -60,6 +65,14 @@ public class UserService{
     public void deleteUser(Long userid) {
         if(!userRepository.existsById(userid)) {
             throw new RuntimeException("유저를 찾을수 없습니다.");
+        }
+        // 유저가 작성한 상품들 조회
+        List<Product> products = productRepository.findByUser_UserId(userid);
+
+        // 상품들의 user 필드를 null로 설정
+        for (Product product : products) {
+            product.setUser(null);
+            productRepository.save(product);  // 상품 저장
         }
         userRepository.deleteById(userid);
     }

@@ -23,9 +23,6 @@ public class UserService{
   @Autowired
   private ProductRepository productRepository;
 
-    @Autowired
-    private ProductRepository productRepository;
-
     // 회원가입
     public User createUser(User user) {
         User createdUser = new User();

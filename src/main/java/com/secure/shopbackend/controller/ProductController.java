@@ -176,8 +176,9 @@ public ResponseEntity<?> deleteProduct(
 
     try {
         productService.deleteProduct(id,files);
+
         return ResponseEntity.ok("삭제 성공");
-    } catch (RuntimeException e) {
+    } catch (Exception e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 }

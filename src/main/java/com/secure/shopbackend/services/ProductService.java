@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -34,6 +35,10 @@ public class ProductService {
     private ImageRepository imageRepository;
     @Autowired
     private UserRepository userRepository;
+
+    // 파일 저장 로직 (예시)
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
 
     // 유저의 토큰값을 찾아올수 없다하여 "ROLE_USER"을 줌으로써 무조건 토큰의 값을 읽어올수 있도록 변경
@@ -88,11 +93,26 @@ public class ProductService {
         product.setCategory(updatedProduct.getCategory());
         product.setStatus("판매중");
 
+        List<Image> imageTest = imageRepository.findByProduct_ProductId(productId);
+        System.out.println(imageTest);
+
+
         if (imageFiles != null && !imageFiles.isEmpty()) {
             List<Image> existingImages = new ArrayList<>(product.getImages());
+            System.out.println("이미지: " + existingImages);
 
             // 기존 이미지
             if (!existingImages.isEmpty()) {
+                // 실제 파일 삭제
+                for (Image image : existingImages) {
+                    Path filePath = Paths.get(uploadDir, image.getImageName());
+                    try {
+                        Files.deleteIfExists(filePath);
+                        System.out.println("파일 삭제 완료: " + filePath);
+                    } catch (Exception e) {
+                        System.err.println("파일 삭제 중 오류 발생: " + filePath + " | " + e.getMessage());
+                    }
+                }
                 product.getImages().clear();    // 상품의 이미지 정리
                 productRepository.save(product);    // 상품 저장
                 imageRepository.deleteAll(existingImages);  // 이미지 지우기
@@ -115,16 +135,14 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-// 상품 상세
+    // 상품 상세
     public Product detailProduct (Long id) {
 
      return productRepository.findById(id).orElseThrow(() -> new RuntimeException("User Not Found"));
 
     }
 
-    // 파일 저장 로직 (예시)
-    @Value("${file.upload-dir}")
-    private String uploadDir;
+
 
     private String storeFile(MultipartFile file) throws Exception {
         // 예시: 지정된 경로에 파일 저장 후, 파일명 반환

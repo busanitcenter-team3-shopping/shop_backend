@@ -171,14 +171,11 @@ public ResponseEntity<?> updateProduct(
 @DeleteMapping("/{id}")
 public ResponseEntity<?> deleteProduct(
         @PathVariable Long id,
-        @AuthenticationPrincipal UserDetailsImpl userDetails) {
-
-    if (userDetails == null) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
+        @RequestPart(value = "files", required = false) List<MultipartFile> files)
+{
 
     try {
-        productService.deleteProduct(id, userDetails);
+        productService.deleteProduct(id,files);
         return ResponseEntity.ok("삭제 성공");
     } catch (RuntimeException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

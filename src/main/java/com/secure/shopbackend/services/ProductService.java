@@ -12,7 +12,6 @@ import com.secure.shopbackend.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -144,26 +143,29 @@ public class ProductService {
 
     }
 
-    public List<Product> getProductsByUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        User user = userRepository.findByEmail(userDetails.getEmail()).orElseThrow(() -> new RuntimeException("User Not Found"));
-        return productRepository.findByUser_UserId(user.getUserId());
-    }
-
     // 상품 삭제
-    public void deleteProduct(Long productId, UserDetailsImpl userDetails) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product Not Found"));
+    @Transactional
+    public void deleteProduct(Long productId, List<MultipartFile> imageFiles) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product Not Found"));
 
-        if (!product.getUser().getEmail().equals(userDetails.getEmail())) {
-            throw new RuntimeException("사ㅣㄱ제할 상품이 없습니다.");
-        }
+        if (product.getImages() != null && !product.getImages().isEmpty()) {
+            List<Image> existingImages = new ArrayList<>(product.getImages());
 
-        if (!product.getImages().isEmpty()) {
-            imageRepository.deleteAll(product.getImages()); // 상품에 있는걸 다 삭제
-            product.getImages().clear();    // 상품의 이미지 정리
-            productRepository.save(product);    
+        if(imageFiles != null && !imageFiles.isEmpty()) {
+            for(Image image : existingImages) {
+                Path filePath = Paths.get(uploadDir, image.getImageName());
+                try {
+                    Files.deleteIfExists(filePath);
+                }catch (Exception e) {
+                e.printStackTrace();}
+            }
+            }
+        product.getImages().clear();
+        productRepository.save(product);
+        imageRepository.deleteAll(existingImages);
         }
-        
-        productRepository.delete(product);
+        imageRepository.deleteByProduct(product);
+        System.out.println("id 확인 : "+ productId);
+        productRepository.deleteProductById(productId);
     }
 }

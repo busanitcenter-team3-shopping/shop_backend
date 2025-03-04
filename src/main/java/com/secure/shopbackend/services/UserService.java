@@ -20,6 +20,8 @@ public class UserService{
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+  @Autowired
+  private ProductRepository productRepository;
 
     @Autowired
     private ProductRepository productRepository;
@@ -74,6 +76,7 @@ public class UserService{
             product.setUser(null);
             productRepository.save(product);  // 상품 저장
         }
+
         userRepository.deleteById(userid);
     }
 }

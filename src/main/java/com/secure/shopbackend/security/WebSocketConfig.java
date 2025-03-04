@@ -1,15 +1,18 @@
 package com.secure.shopbackend.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.*;
 
 @Configuration
+@RequiredArgsConstructor
 @EnableWebSocket
-public class WebSocketConfig implements WebSocketConfigurer { // ✅ WebSocketConfigurer 사용
+public class WebSocketConfig implements WebSocketConfigurer {
+
+  private final ChatHandler chatHandler;
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(new ChatWebSocketHandler(), "/ws-chat")
-            .setAllowedOrigins("*");
+    registry.addHandler(chatHandler, "/chat").setAllowedOrigins("*").withSockJS();;
   }
 }

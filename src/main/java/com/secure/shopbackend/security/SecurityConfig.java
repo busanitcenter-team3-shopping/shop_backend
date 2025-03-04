@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/admin/login").permitAll() // 관리자 로그인은 누구나 접근 가능
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/", "/**","/user/**").permitAll()
+                        .requestMatchers("/chat/**").permitAll()
                         .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // 세션 사용 안함

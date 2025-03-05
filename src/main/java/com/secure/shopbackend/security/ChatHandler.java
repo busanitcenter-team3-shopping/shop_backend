@@ -28,7 +28,7 @@ public class ChatHandler extends TextWebSocketHandler {
   @Override
   public void afterConnectionEstablished(WebSocketSession session) throws Exception {
     list.add(session);
-    log.info(session + "클라이언트 접속");
+    log.info("연결 성공 : " + session + "클라이언트 접속");
   }
   
   @Override

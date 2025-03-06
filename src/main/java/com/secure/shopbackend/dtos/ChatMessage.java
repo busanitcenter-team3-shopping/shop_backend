@@ -1,12 +1,18 @@
 package com.secure.shopbackend.dtos;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "message")
 public class ChatMessage {
 
@@ -15,8 +21,13 @@ public class ChatMessage {
   @Column(name = "message_id")
   private Long messageId;
 
-  @Column(name = "user_id")
-  private Long userId;
+  @ManyToOne
+  @JoinColumn(name = "sender_id", nullable = false)
+  private User sender;
+
+  @ManyToOne
+  @JoinColumn(name = "receiver_id", nullable = false)
+  private User receiver;
 
   @Column(name = "content")
   private String content;
@@ -30,4 +41,16 @@ public class ChatMessage {
 
   @Column(name = "is_read")
   private Boolean isRead;
+
+  public static ChatMessage fromEntity(ChatMessage chatMessage) {
+    return ChatMessage.builder()
+            .messageId(chatMessage.getMessageId())
+            .sender(chatMessage.getSender())
+            .receiver(chatMessage.getReceiver())
+            .content(chatMessage.getContent())
+            .chatRoom(chatMessage.getChatRoom())
+            .timestamp(chatMessage.getTimestamp())
+            .isRead(chatMessage.getIsRead())
+            .build();
+  }
 }

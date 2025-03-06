@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/notice")
-@PreAuthorize("hasRole('ADMIN')")
+@CrossOrigin("*")
+@RequestMapping("/notice")
 public class AdminNoticeController {
 
     @Autowired

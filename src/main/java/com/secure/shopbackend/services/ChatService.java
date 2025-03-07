@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,20 +46,9 @@ public class ChatService {
     }
 
     //메시지 저장
-    public ChatMessage saveMessage (Long senderId, Long receiverId, String content, Long chatRoomId) {
-       User sender = userRepository.findById(senderId).orElseThrow(()-> new RuntimeException("발신자를 찾을 수 없습니다."));
-       User receiver = userRepository.findById(receiverId).orElseThrow(()-> new RuntimeException("수진자를 찾을 수 없습니다."));
-       ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(()-> new RuntimeException("ChatRoom not found"));
+    public ChatMessage saveMessage (ChatMessage chatMessage) {
 
-       ChatMessage message = new ChatMessage();
-               message.setSender(sender);
-               message.setReceiver(receiver);
-               message.setContent(content);
-               message.setChatRoom(chatRoom);
-               message.setTimestamp(LocalDateTime.now());
-               message.setIsRead(false);
-
-       return messageRepository.save(message);
+       return messageRepository.save(chatMessage);
     }
     
     //메시지 리스트 조회
@@ -91,8 +81,13 @@ public class ChatService {
     }
 
     //모든 채팅방 조회
-    public List<ChatRoom> getMyChatRooms(){
-        return chatRoomRepository.findAll();
+    public List<ChatRoom> getMyChatRooms(UserDetailsImpl userDetails) {
+        User user = userRepository.findByUserId(userDetails.getId());
+        System.out.println(userDetails);
+        System.out.println("로그인한 유저:"+ user);
+        return chatRoomRepository.findAll().stream()
+                .filter(room -> room.getUser1().getUserId().equals(user.getUserId())|| room.getUser2().getUserId().equals(user.getUserId()))
+                .collect(Collectors.toList());
     }
 
     public ChatRoom getChatRoomById(Long chatRoomId){
@@ -117,5 +112,11 @@ public class ChatService {
             System.out.println("✅ 사용자 " + user.getUsername() + "가 채팅방 " + chatRoomId + "에 참여했습니다.");
 
         }
+    }
+
+    public ChatRoom getChatRoomDetails(Long id) {
+        ChatRoom chatRoom = chatRoomRepository.findById(id).orElseThrow(()-> new RuntimeException("ChatRoom not found"));
+
+        return chatRoom;
     }
 }

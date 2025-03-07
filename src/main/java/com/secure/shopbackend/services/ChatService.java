@@ -21,39 +21,10 @@ public class ChatService {
     private final ProductRepository productRepository;
     private final ChatParticipantRepository chatParticipantRepository;
 
-    // 1:1 채팅방 찾기 (없으면 자동 생성)
-    @Transactional
-    public ChatRoom findOrCreateChatRoom(Long user1Id, Long user2Id, Long productId) {
-        User user1 = userRepository.findById(user1Id)
-                .orElseThrow(() -> new RuntimeException("사용자 1 찾을 수 없음"));
-        User user2 = userRepository.findById(user2Id)
-                .orElseThrow(() -> new RuntimeException("사용자 2 찾을 수 없음"));
-        Product product = productRepository.findById(productId).orElseThrow(()-> new RuntimeException("상품을 찾을 수 없음"));
-
-        // 기존 채팅방이 있는지 확인
-        Optional<ChatRoom> existingRoom = chatRoomRepository.findAll()
-                .stream()
-                .filter(room -> room.isSameRoom(user1, user2, product))
-                .findFirst();
-
-        return existingRoom.orElseGet(() -> {
-            ChatRoom newRoom = ChatRoom.builder()
-                    .user1(user1)
-                    .user2(user2)
-                    .build();
-            return chatRoomRepository.save(newRoom);
-        });
-    }
-
     //메시지 저장
     public ChatMessage saveMessage (ChatMessage chatMessage) {
 
        return messageRepository.save(chatMessage);
-    }
-    
-    //메시지 리스트 조회
-    public List<ChatMessage> getMessages() {
-        return messageRepository.findAll();
     }
     
     //채팅방 생성
@@ -98,20 +69,6 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(()-> new RuntimeException("ChatRoom not found"));
 
         return messageRepository.findByChatRoom(chatRoom);
-    }
-
-    public void addParticipant(Long userId, Long chatRoomId){
-        User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("User not found"));
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(()-> new RuntimeException("ChatRoom not found"));
-
-        boolean alreadyExists = chatParticipantRepository.findByUserAndChatRoom(user, chatRoom).isPresent();
-
-        if(alreadyExists){
-            ChatParticipant participant = new ChatParticipant(user, chatRoom);
-            chatParticipantRepository.save(participant);
-            System.out.println("✅ 사용자 " + user.getUsername() + "가 채팅방 " + chatRoomId + "에 참여했습니다.");
-
-        }
     }
 
     public ChatRoom getChatRoomDetails(Long id) {

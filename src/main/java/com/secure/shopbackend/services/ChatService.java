@@ -70,7 +70,7 @@ public class ChatService {
 
         return existingRoom.orElseGet(()->{
             ChatRoom room = new ChatRoom();
-            room.setName(product.getUser().getUsername());
+            room.setName(product.getTitle());
             room.setStatus(status);
             room.setProduct(product);
             room.setUser1(user1);

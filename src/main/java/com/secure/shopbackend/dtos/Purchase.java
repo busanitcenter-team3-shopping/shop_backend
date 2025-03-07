@@ -14,7 +14,7 @@ public class Purchase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JoinColumn(name = "purchase_id")
-    private Integer favoriteId;
+    private Integer purchaseId;
 
     @ManyToOne
     @JoinColumn(name = "product_id")

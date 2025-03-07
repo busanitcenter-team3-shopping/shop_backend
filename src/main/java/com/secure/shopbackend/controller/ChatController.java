@@ -7,6 +7,7 @@ import com.secure.shopbackend.services.ChatService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,12 +41,18 @@ public class ChatController {
   }
 
   @GetMapping("/rooms")
-  public List<ChatRoom> getMyChatRooms() {
-    return chatService.getMyChatRooms();
+  public List<ChatRoom> getMyChatRooms(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    return chatService.getMyChatRooms(userDetails);
   }
 
   @GetMapping("/rooms/{id}")
   public ChatRoom getRoomById(@PathVariable Long id){
     return chatService.getChatRoomById(id);
+  }
+
+  @GetMapping("/rooms/{id}/details")
+  public ResponseEntity<ChatRoom> getRoomDetails(@PathVariable Long id){
+    ChatRoom room = chatService.getChatRoomDetails(id);
+    return ResponseEntity.ok(room);
   }
 }

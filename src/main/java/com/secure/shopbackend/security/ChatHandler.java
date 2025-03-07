@@ -1,9 +1,12 @@
 package com.secure.shopbackend.security;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.secure.shopbackend.dtos.ChatMessage;
 import com.secure.shopbackend.dtos.ChatRoom;
 import com.secure.shopbackend.dtos.User;
+import com.secure.shopbackend.repositories.ChatRoomRepository;
 import com.secure.shopbackend.repositories.UserRepository;
 import com.secure.shopbackend.services.ChatService;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +17,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -28,11 +32,13 @@ public class ChatHandler extends TextWebSocketHandler {
 
   private final ObjectMapper objectMapper;
   private final UserRepository userRepository;
+  private final ChatRoomRepository chatRoomRepository;
 
-  public ChatHandler(ChatService chatService, ObjectMapper objectMapper, UserRepository userRepository) {
+  public ChatHandler(ChatService chatService, ObjectMapper objectMapper, UserRepository userRepository, ChatRoomRepository chatRoomRepository) {
     this.chatService = chatService;
     this.objectMapper = objectMapper;
     this.userRepository = userRepository;
+    this.chatRoomRepository = chatRoomRepository;
   }
 
   
@@ -42,14 +48,33 @@ public class ChatHandler extends TextWebSocketHandler {
     log.info("payload:" + payload);
 
     try {
-      ChatMessage chatMessage = objectMapper.readValue(payload, ChatMessage.class);
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.registerModule(new JavaTimeModule());
+      JsonNode jsonNode = objectMapper.readTree(payload);
 
-      ChatMessage savedMessage = chatService.saveMessage(
-              chatMessage.getSender().getUserId(),
-              chatMessage.getReceiver().getUserId(),
-              chatMessage.getContent(),
-              chatMessage.getChatRoom().getChatRoomId()
-      );
+      Long senderId = jsonNode.get("senderId").asLong();
+      Long receiverId = jsonNode.get("receiverId").asLong();
+      Long chatRoomId = jsonNode.get("chatRoomId").asLong();
+      String content = jsonNode.get("content").asText();
+
+      if (senderId == null || chatRoomId == null || receiverId == null) {
+        log.error("❌ 메시지 전송 오류: senderId 또는 chatRoomId 또는 receiverId 가 null입니다.");
+        return;
+      }
+
+      User sender = userRepository.findById(senderId).orElseThrow(()-> new RuntimeException("Sender not found"));
+      User receiver = userRepository.findById(receiverId).orElseThrow(()-> new RuntimeException("Receiver not found"));
+
+        ChatMessage chatMessage = new ChatMessage();
+            chatMessage.setSender(sender);
+            chatMessage.setReceiver(receiver);
+            chatMessage.setContent(content);
+            chatMessage.setChatRoom(chatRoomRepository.findById(chatRoomId).orElseThrow(()-> new RuntimeException("ChatRoom not found")));
+            chatMessage.setTimestamp(LocalDateTime.now());
+            chatMessage.setIsRead(false);
+
+            ChatMessage savedMessage = chatService.saveMessage(chatMessage);
+
 
       ChatMessage responseMessage = ChatMessage.fromEntity(savedMessage);
       String jsonMessage = objectMapper.writeValueAsString(responseMessage);

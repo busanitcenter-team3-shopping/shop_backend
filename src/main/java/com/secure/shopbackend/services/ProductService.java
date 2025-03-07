@@ -40,14 +40,6 @@ public class ProductService {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-
-    // 유저의 토큰값을 찾아올수 없다하여 "ROLE_USER"을 줌으로써 무조건 토큰의 값을 읽어올수 있도록 변경
-    // 이미지 테이블에 product_id가 없어서 이미지를 참조할 부분이 없어서 추가
-    // product 테이블에 필요없는 category_id, image_id 제거
-    // 카테고리를 enum으로 변경함으로써 ALTER TABLE product ADD COLUMN category VARCHAR(255); 추가
-    // ALTER TABLE image ADD COLUMN product_id BIGINT; 이미지 테이블에 product_id를 참조할 내용 추가
-
-
     // 상품 등록: 상품 정보와 이미지 파일을 받아서 처리
 //    @Transactional
     public Product createProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, Product productDto, List<MultipartFile> imageFiles) throws Exception {

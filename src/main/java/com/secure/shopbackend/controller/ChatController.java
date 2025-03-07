@@ -2,8 +2,10 @@ package com.secure.shopbackend.controller;
 
 import com.secure.shopbackend.dtos.ChatMessage;
 import com.secure.shopbackend.dtos.ChatRoom;
+import com.secure.shopbackend.repositories.PurchaseRepository;
 import com.secure.shopbackend.security.services.UserDetailsImpl;
 import com.secure.shopbackend.services.ChatService;
+import com.secure.shopbackend.services.PurchaseService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @Log4j2
@@ -20,12 +23,10 @@ public class ChatController {
   @Autowired
   private ChatService chatService;
 
-//  @GetMapping("/chat")
-//  public String chatGET() {
-//    log.info("@ChatController, chat GET()");
-//    return "chater";
-//  }
+  @Autowired
+  private PurchaseService purchaseService;
 
+  // 채팅 메시지 불러오기
   @GetMapping("/rooms/{id}/messages")
   public List<ChatMessage> getMessagesByRoom(@PathVariable Long id) {
     return chatService.getMessagesByChatRoomId(id);
@@ -40,19 +41,31 @@ public class ChatController {
     return ResponseEntity.ok(newRoom);
   }
 
+  // 나의 채팅방 목록
   @GetMapping("/rooms")
   public List<ChatRoom> getMyChatRooms(@AuthenticationPrincipal UserDetailsImpl userDetails) {
     return chatService.getMyChatRooms(userDetails);
   }
 
+  // 채팅방
   @GetMapping("/rooms/{id}")
   public ChatRoom getRoomById(@PathVariable Long id){
     return chatService.getChatRoomById(id);
   }
 
+  // 채팅방 정보
   @GetMapping("/rooms/{id}/details")
   public ResponseEntity<ChatRoom> getRoomDetails(@PathVariable Long id){
     ChatRoom room = chatService.getChatRoomDetails(id);
     return ResponseEntity.ok(room);
+  }
+
+  //상품 판매
+  @PostMapping("/purchase/{chatRoomId}")
+  public ResponseEntity<?> completePurchase(
+          @PathVariable Long chatRoomId,
+          @RequestBody Map<String, Long> requestBody) {
+    Long buyerId = requestBody.get("buyerId");
+    return purchaseService.completePurchase(chatRoomId, buyerId);
   }
 }

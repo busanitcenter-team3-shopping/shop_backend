@@ -94,16 +94,6 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
-//    //유저의 상품 조회
-//    @GetMapping("/user-page")
-//    public ResponseEntity<List<Product>> getUserProducts(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-//        if (userDetails == null) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-//        }
-//        List<Product> products = productService.getProductsByUser(userDetails);
-//        return ResponseEntity.ok(products);
-//    }
-
     //판매자 상품 조회
     @GetMapping("/user-page/{id}")
     public ResponseEntity<List<Product>> getSellerProducts(@PathVariable Long id) {

@@ -63,10 +63,10 @@ public class ChatService {
         User user1 = userRepository.findByUserId(userId);
         User user2 = product.getUser();
 
-        Optional<ChatRoom> existingRoom = chatRoomRepository.findAll()
-                .stream()
-                .filter(room-> room.isSameRoom(user1, user2, product))
-                .findFirst();
+        Optional<ChatRoom> existingRoom = chatRoomRepository.findByUser1AndUser2AndProduct(user1, user2, product);
+        if (existingRoom.isEmpty()) {
+            existingRoom = chatRoomRepository.findByUser2AndUser1AndProduct(user1, user2, product);
+        }
 
         return existingRoom.orElseGet(()->{
             ChatRoom room = new ChatRoom();

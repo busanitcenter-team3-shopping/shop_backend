@@ -13,7 +13,7 @@ public class Favorite {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JoinColumn(name = "favorite_id")
+    @Column(name = "favorite_id")
     private Long favoriteId;
 
     @ManyToOne

@@ -37,8 +37,6 @@ public class PurchaseController {
         Product product = productRepository.findById((long) request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-
-
         if (purchaseRepository.findByUserAndProduct_ProductId(user, request.getProductId()) != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 구매한 상품입니다.");
         }
@@ -65,7 +63,6 @@ public class PurchaseController {
         }
     }
 
-    // 로그인한 사용자의 찜 목록 조회 (GET)
     @GetMapping
     public ResponseEntity<?> getPruchases(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         Long userId = userDetails.getId(); // 실제 userId를 얻음

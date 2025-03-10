@@ -12,6 +12,7 @@ import com.secure.shopbackend.services.ChatService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class ChatHandler extends TextWebSocketHandler {
-  
+
   private static Map<Long, WebSocketSession> userSessions = new ConcurrentHashMap<>();
 
   private final ChatService chatService;
@@ -33,15 +34,17 @@ public class ChatHandler extends TextWebSocketHandler {
   private final ObjectMapper objectMapper;
   private final UserRepository userRepository;
   private final ChatRoomRepository chatRoomRepository;
+  private final SimpleControllerHandlerAdapter simpleControllerHandlerAdapter;
 
-  public ChatHandler(ChatService chatService, ObjectMapper objectMapper, UserRepository userRepository, ChatRoomRepository chatRoomRepository) {
+  public ChatHandler(ChatService chatService, ObjectMapper objectMapper, UserRepository userRepository, ChatRoomRepository chatRoomRepository, SimpleControllerHandlerAdapter simpleControllerHandlerAdapter) {
     this.chatService = chatService;
     this.objectMapper = objectMapper;
     this.userRepository = userRepository;
     this.chatRoomRepository = chatRoomRepository;
+    this.simpleControllerHandlerAdapter = simpleControllerHandlerAdapter;
   }
 
-  
+
   @Override
   protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
     String payload = message.getPayload();
@@ -86,7 +89,7 @@ public class ChatHandler extends TextWebSocketHandler {
       log.error(e.getMessage());
     }
   }
-  
+
   @Override
   public void afterConnectionEstablished(WebSocketSession session) throws Exception {
     Map<String, String> params = getQueryParams(session);
@@ -101,6 +104,8 @@ public class ChatHandler extends TextWebSocketHandler {
     try {
       Long userId = Long.parseLong(userIdStr);
       log.info("✅ 채팅방 {} 연결 성공", userId);
+
+      chatService.markMessagesAsRead(userId);
 
       userSessions.put(userId, session);
     } catch (NumberFormatException e) {

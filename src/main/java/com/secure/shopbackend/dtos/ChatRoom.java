@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -47,4 +48,5 @@ public class ChatRoom {
   public boolean isSameRoom(User u1, User u2, Product product) {
     return (user1.equals(u1) && user2.equals(u2)) || (user1.equals(u2) && user2.equals(u1));
   }
+
 }

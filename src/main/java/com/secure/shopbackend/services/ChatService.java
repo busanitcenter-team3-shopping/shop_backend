@@ -56,8 +56,10 @@ public class ChatService {
         System.out.println(userDetails);
         System.out.println("로그인한 유저:"+ user);
         return chatRoomRepository.findAll().stream()
-                .filter(room -> room.getUser1().getUserId().equals(user.getUserId())|| room.getUser2().getUserId().equals(user.getUserId()))
+                .filter(room -> room.getUser1() != null && room.getUser1().getUserId().equals(user.getUserId())
+                        || (room.getUser2() != null && room.getUser2().getUserId().equals(user.getUserId())))
                 .collect(Collectors.toList());
+
     }
 
     public ChatRoom getChatRoomById(Long chatRoomId){

@@ -23,8 +23,6 @@ public class PurchaseController {
     @Autowired
     private UserRepository userRepository;
 
-
-    // 주문내역 조회
     @GetMapping
     public ResponseEntity<?> getPurchases(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         Long userId = userDetails.getId(); // 실제 userId를 얻음

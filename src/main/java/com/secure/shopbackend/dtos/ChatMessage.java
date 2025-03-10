@@ -21,12 +21,12 @@ public class ChatMessage {
   @Column(name = "message_id")
   private Long messageId;
 
-  @ManyToOne
-  @JoinColumn(name = "sender_id", nullable = false)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "sender_id", nullable = true)
   private User sender;
 
-  @ManyToOne
-  @JoinColumn(name = "receiver_id", nullable = false)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "receiver_id", nullable = true)
   private User receiver;
 
   @Column(name = "content")

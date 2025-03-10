@@ -33,4 +33,11 @@ public class PurchaseController {
         List<Purchase> purchase = purchaseRepository.findAllByUser(user);
         return ResponseEntity.ok(purchase);
     }
+
+    // 모든 판매내역 조회
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllPurchases() {
+        List<Purchase> purchases = purchaseRepository.findAll();
+        return ResponseEntity.ok(purchases);
+    }
 }

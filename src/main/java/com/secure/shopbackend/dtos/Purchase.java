@@ -3,6 +3,8 @@ package com.secure.shopbackend.dtos;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "purchase_history")
 @Data
@@ -13,8 +15,8 @@ public class Purchase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JoinColumn(name = "purchase_id")
-    private Integer favoriteId;
+    @Column(name = "purchase_id")
+    private Long purchaseId;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
@@ -23,4 +25,7 @@ public class Purchase {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL)
+    private List<Review> reviews;
 }

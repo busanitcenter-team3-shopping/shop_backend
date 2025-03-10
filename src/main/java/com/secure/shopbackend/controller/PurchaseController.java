@@ -33,9 +33,9 @@ public class PurchaseController {
     public ResponseEntity<?> addPurchase(@RequestBody PurchaseRequest request, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         Long userId = userDetails.getId(); // 실제 userId를 얻음
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("구매자를 찾을 수 없습니다."));
         Product product = productRepository.findById((long) request.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다."));
 
 
 
@@ -54,23 +54,22 @@ public class PurchaseController {
     public ResponseEntity<?> removePruchase(@PathVariable int productId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         Long userId = userDetails.getId(); // 실제 userId를 얻음
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("구매자를 찾을 수 없습니다."));
 
         Purchase purchase = purchaseRepository.findByUserAndProduct_ProductId(user, productId);
         if (purchase != null) {
             purchaseRepository.delete(purchase);
             return ResponseEntity.ok("Pruchase removed");
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pruchase not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("구매내역을 찾을 수 없습니다.");
         }
     }
 
-    // 로그인한 사용자의 찜 목록 조회 (GET)
     @GetMapping
     public ResponseEntity<?> getPruchases(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         Long userId = userDetails.getId(); // 실제 userId를 얻음
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("구매자를 찾을 수 없습니다."));
         List<Purchase> purchase = purchaseRepository.findAllByUser(user);
         return ResponseEntity.ok(purchase);
     }

@@ -19,14 +19,13 @@ public class ChatService {
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
-    private final ChatParticipantRepository chatParticipantRepository;
 
     //메시지 저장
     public ChatMessage saveMessage (ChatMessage chatMessage) {
 
-       return messageRepository.save(chatMessage);
+        return messageRepository.save(chatMessage);
     }
-    
+
     //채팅방 생성
     public ChatRoom createChatRoom(String status, Long productId, Long userId){
         Product product = productRepository.findById(productId).orElseThrow(()-> new RuntimeException("Product not found"));

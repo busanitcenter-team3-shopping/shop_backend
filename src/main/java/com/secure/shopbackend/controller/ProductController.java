@@ -42,8 +42,7 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
-  @Autowired
-  private UserRepository userRepository;
+
     @Autowired
     private ProductRepository productRepository;
 
@@ -84,7 +83,7 @@ public class ProductController {
     }
 
 
-  // 카테고리별 상품 받기
+    // 카테고리별 상품 받기
     @GetMapping
     public ResponseEntity<List<Product>> getProducts(
             @RequestParam(required = false, defaultValue = "ALL") Category category,
@@ -128,49 +127,49 @@ public class ProductController {
     //상세 상품 보기
     @GetMapping("/{id}")
     public ResponseEntity<?> getdetailProduct(@PathVariable Long id) {
-      Product product = productService.detailProduct(id);
-      System.out.println(product);
-      return ResponseEntity.ok(product);
-    }
-
-// 상품 수정
-@PutMapping("/{id}")
-public ResponseEntity<?> updateProduct(
-        @PathVariable Long id,
-        @AuthenticationPrincipal UserDetailsImpl userDetails,
-        @RequestPart("product") String productJson,
-        @RequestPart(value = "files", required = false) List<MultipartFile> files) {
-
-    if (userDetails == null) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
-    ObjectMapper objectMapper = new ObjectMapper();
-    Product updatedProduct;
-
-    try {
-        updatedProduct = objectMapper.readValue(productJson, Product.class);
-        Product product = productService.updateProduct(id, userDetails, updatedProduct, files);
+        Product product = productService.detailProduct(id);
+        System.out.println(product);
         return ResponseEntity.ok(product);
-    } catch (Exception e) {
-        return ResponseEntity.badRequest().body("에러: " + e.getMessage());
     }
-}
 
-// 삭제
-@DeleteMapping("/{id}")
-public ResponseEntity<?> deleteProduct(
-        @PathVariable Long id,
-        @RequestPart(value = "files", required = false) List<MultipartFile> files)
-{
+    // 상품 수정
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateProduct(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @RequestPart("product") String productJson,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) {
 
-    try {
-        productService.deleteProduct(id,files);
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
-        return ResponseEntity.ok("삭제 성공");
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        ObjectMapper objectMapper = new ObjectMapper();
+        Product updatedProduct;
+
+        try {
+            updatedProduct = objectMapper.readValue(productJson, Product.class);
+            Product product = productService.updateProduct(id, userDetails, updatedProduct, files);
+            return ResponseEntity.ok(product);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("에러: " + e.getMessage());
+        }
     }
-}
+
+    // 삭제
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteProduct(
+            @PathVariable Long id,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files)
+    {
+
+        try {
+            productService.deleteProduct(id,files);
+
+            return ResponseEntity.ok("삭제 성공");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 
 }

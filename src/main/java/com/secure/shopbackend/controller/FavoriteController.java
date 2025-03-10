@@ -10,7 +10,6 @@ import com.secure.shopbackend.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +35,7 @@ public class FavoriteController {
         Long userId = userDetails.getId(); // 실제 userId를 얻음
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        Product product = productRepository.findById((long) request.getProductId())
+        Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
 
@@ -55,7 +54,7 @@ public class FavoriteController {
 
     // 찜 삭제 (DELETE)
     @DeleteMapping("/{productId}")
-    public ResponseEntity<?> removeFavorite(@PathVariable int productId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<?> removeFavorite(@PathVariable long productId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         Long userId = userDetails.getId(); // 실제 userId를 얻음
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -81,8 +80,14 @@ public class FavoriteController {
 
     // DTO for 찜 추가 요청
     public static class FavoriteRequest {
-        private int productId;
-        public int getProductId() { return productId; }
-        public void setProductId(int productId) { this.productId = productId; }
+        private long productId;
+
+        public long getProductId() {
+            return productId;
+        }
+
+        public void setProductId(long productId) {
+            this.productId = productId;
+        }
     }
 }

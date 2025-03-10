@@ -18,6 +18,7 @@ public class Purchase {
     @Column(name = "purchase_id")
     private Long purchaseId;
 
+
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;

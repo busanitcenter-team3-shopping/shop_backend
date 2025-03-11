@@ -82,4 +82,9 @@ public class ChatService {
     public void markMessagesAsRead(Long chatRoomId) {
         int updatedCount = messageRepository.markMessagesAsRead(chatRoomId);
     }
+
+    // 방 안읽은 메시지 개수
+    public int getUnreadMessageCount(Long chatRoomId) {
+        return messageRepository.countRead(chatRoomId);
+    }
 }

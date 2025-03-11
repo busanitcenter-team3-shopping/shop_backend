@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,28 +35,37 @@ public class ReviewService {
 
     @Transactional
     public Review createReview(Review reviewDto, MultipartFile imageFile) throws Exception {
-
+        // 구매 내역 검증
         if (reviewDto.getPurchase() == null || reviewDto.getPurchase().getPurchaseId() == null) {
             throw new RuntimeException("구매 내역이 누락되었습니다.");
         }
-        Purchase purchase = purchaseRepository.findById(reviewDto.getPurchase().getPurchaseId().intValue())
+        Purchase purchase = purchaseRepository.findById(reviewDto.getPurchase().getPurchaseId())
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 구매 내역입니다."));
 
         // 작성자 확인
         Long writerId = reviewDto.getUser().getUserId();
+
+        // 중복 리뷰 작성 방지
+        Optional<Review> existingReview = reviewRepository.findByPurchasePurchaseIdAndUserUserId(
+                purchase.getPurchaseId(), writerId);
+        if(existingReview.isPresent()){
+            throw new RuntimeException("이미 리뷰를 작성하셨습니다.");
+        }
+
         Long buyerId  = purchase.getUser().getUserId();
         Long sellerId = purchase.getProduct().getUser().getUserId();
 
         String reviewType;
         if (writerId.equals(buyerId)) {
-            // 구 > 판
+            // 구 > 판 리뷰
             reviewType = "BUYER_TO_SELLER";
         } else if (writerId.equals(sellerId)) {
-            // 판 > 구
+            // 판 > 구 리뷰
             reviewType = "SELLER_TO_BUYER";
         } else {
             throw new RuntimeException("해당 구매 내역과 관계없는 사용자입니다.");
         }
+
 
         Review review = new Review();
         review.setTitle(reviewDto.getTitle());
@@ -76,7 +86,7 @@ public class ReviewService {
         return reviewRepository.save(review);
     }
 
-    // 파일 저장 메서드
+    // 파일 저장 로직
     private String storeFile(MultipartFile file) throws Exception {
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
@@ -106,20 +116,19 @@ public class ReviewService {
         reviewRepository.deleteById(reviewId);
     }
 
-    // 리뷰 조회
+    // 판매자 또는 구매자 기준 리뷰 조회
     public List<SellerReviewResponseDto> getReviewsForTarget(Long targetUserId) {
-        // 모든 리뷰를 조회한 후 메모리에서 필터링
-        List<Review> allReviews = reviewRepository.findAll();
-        return allReviews.stream()
+
+        return reviewRepository.findAll().stream()
                 .filter(r -> {
                     String type = r.getReviewType();
                     if ("BUYER_TO_SELLER".equals(type)) {
-                        // 상품의 판매자
+                        // 판매자
                         return r.getProduct() != null &&
                                 r.getProduct().getUser() != null &&
                                 r.getProduct().getUser().getUserId().equals(targetUserId);
                     } else if ("SELLER_TO_BUYER".equals(type)) {
-                        // 구매 내역의 구매자
+                        // 구매자
                         return r.getPurchase() != null &&
                                 r.getPurchase().getUser() != null &&
                                 r.getPurchase().getUser().getUserId().equals(targetUserId);

@@ -3,9 +3,9 @@ package com.secure.shopbackend.services;
 import com.secure.shopbackend.dtos.*;
 import com.secure.shopbackend.repositories.*;
 import com.secure.shopbackend.security.services.UserDetailsImpl;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -56,8 +56,10 @@ public class ChatService {
         System.out.println(userDetails);
         System.out.println("로그인한 유저:"+ user);
         return chatRoomRepository.findAll().stream()
-                .filter(room -> room.getUser1().getUserId().equals(user.getUserId())|| room.getUser2().getUserId().equals(user.getUserId()))
+                .filter(room -> room.getUser1() != null && room.getUser1().getUserId().equals(user.getUserId())
+                        || (room.getUser2() != null && room.getUser2().getUserId().equals(user.getUserId())))
                 .collect(Collectors.toList());
+
     }
 
     public ChatRoom getChatRoomById(Long chatRoomId){
@@ -74,5 +76,10 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomRepository.findById(id).orElseThrow(()-> new RuntimeException("ChatRoom not found"));
 
         return chatRoom;
+    }
+
+    @Transactional
+    public void markMessagesAsRead(Long chatRoomId) {
+        int updatedCount = messageRepository.markMessagesAsRead(chatRoomId);
     }
 }

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -32,19 +33,20 @@ public class ChatRoom {
   @Column(name = "created_at")
   private LocalDateTime creationDate;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "product_id", nullable = false)
   private Product product;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user1_id", nullable = false)
   private User user1;
 
-  @ManyToOne
-  @JoinColumn(name = "user2_id", nullable = false)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user2_id", nullable = true)
   private User user2;
 
   public boolean isSameRoom(User u1, User u2, Product product) {
     return (user1.equals(u1) && user2.equals(u2)) || (user1.equals(u2) && user2.equals(u1));
   }
+
 }

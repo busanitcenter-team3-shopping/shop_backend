@@ -25,6 +25,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User implements UserDetails {
 
     @Id
@@ -54,7 +55,7 @@ public class User implements UserDetails {
     @UpdateTimestamp    // 업데이트 시간 정하기
     private LocalDateTime updated_at;
 
-    @OneToMany(mappedBy = "user",fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
+    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
     @JsonIgnoreProperties("user")
     private List<Product> products;
 

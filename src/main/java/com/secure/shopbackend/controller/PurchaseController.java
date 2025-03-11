@@ -25,6 +25,7 @@ public class PurchaseController {
     @Autowired
     private UserRepository userRepository;
 
+
     @Autowired
     private PurchaseService purchaseService;
 
@@ -45,6 +46,13 @@ public class PurchaseController {
         // purchaseService 사용 가능
         List<PurchaseResponseDto> dtoList = purchaseService.getPurchasesForUser(userId);
         return ResponseEntity.ok(dtoList);
+    }
+
+    // 모든 판매내역 조회
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllPurchases() {
+        List<Purchase> purchases = purchaseRepository.findAll();
+        return ResponseEntity.ok(purchases);
     }
 }
 

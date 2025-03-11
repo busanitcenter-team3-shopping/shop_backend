@@ -21,6 +21,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Product {
 
     @Id
@@ -44,7 +45,7 @@ public class Product {
     @UpdateTimestamp
     private LocalDateTime updated_at;
 
-    @JsonIgnoreProperties
+    @JsonIgnoreProperties("products")
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = true)
     private User user;

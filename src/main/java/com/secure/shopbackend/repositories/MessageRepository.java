@@ -21,6 +21,11 @@ public interface MessageRepository extends JpaRepository<ChatMessage, Long> {
     int markMessagesAsRead(Long userId);
 
     // 채팅방 하나의 읽지않은 메서드 수
-    @Query("SELECT COUNT(*) FROM ChatMessage WHERE chatRoom.chatRoomId = :chatRoomId and isRead = false")
-    int countRead(Long chatRoomId);
+    @Query("SELECT COUNT(*) FROM ChatMessage WHERE chatRoom.chatRoomId = :chatRoomId AND receiver.userId = :userId AND isRead = false")
+    int countRead(@Param("chatRoomId")Long chatRoomId, @Param("userId") Long userId);
+    
+    
+    // 채팅방 전체 읽지않은 메서드 수
+    @Query("SELECT COUNT(m) FROM ChatMessage m WHERE m.receiver.userId = :userId AND m.isRead = false")
+    int countUnreadALLMessages(@Param("userId") Long userId);
 }

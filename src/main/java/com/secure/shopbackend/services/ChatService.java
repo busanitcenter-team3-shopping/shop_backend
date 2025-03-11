@@ -84,7 +84,12 @@ public class ChatService {
     }
 
     // 방 안읽은 메시지 개수
-    public int getUnreadMessageCount(Long chatRoomId) {
-        return messageRepository.countRead(chatRoomId);
+    public int getUnreadMessageCount(Long chatRoomId, Long userId) {
+        return messageRepository.countRead(chatRoomId, userId);
+    }
+    
+    // 전체 방 읽지 않은 메시지 개수
+    public int getUnreadAllMessagesCount(Long userId) {
+        return messageRepository.countUnreadALLMessages(userId);
     }
 }

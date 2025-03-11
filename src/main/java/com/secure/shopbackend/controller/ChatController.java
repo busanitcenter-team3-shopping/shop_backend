@@ -62,9 +62,18 @@ public class ChatController {
 
   // 하나의 채팅방에 읽지않은 메시지 개수
   @GetMapping("/rooms/{id}/unread-count")
-  public ResponseEntity<Integer> getUnreadMessageCount(@PathVariable Long id) {
-    int unreadCount = chatService.getUnreadMessageCount(id);
+  public ResponseEntity<Integer> getUnreadMessageCount(@PathVariable Long id, @RequestParam Long userId) {
+    int unreadCount = chatService.getUnreadMessageCount(id, userId);
     return ResponseEntity.ok(unreadCount);
+  }
+
+
+  //한 유저의 전체 채팅방 읽지 않은 메시지 개수
+  @GetMapping("/rooms/unread")
+  public ResponseEntity<Integer> getUnreadAllMessagesCount(@RequestParam Long userId) {
+    int unreadCount = chatService.getUnreadAllMessagesCount(userId);
+    return ResponseEntity.ok(unreadCount);
+
   }
 
   //상품 판매

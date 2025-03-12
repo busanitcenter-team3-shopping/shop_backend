@@ -1,5 +1,6 @@
 package com.secure.shopbackend.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "message")
+@JsonIgnoreProperties({"chatRoom", "sender" ,"receiver"})
 public class ChatMessage {
 
   @Id

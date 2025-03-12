@@ -83,36 +83,13 @@ public class ChatHandler extends TextWebSocketHandler {
       String jsonMessage = objectMapper.writeValueAsString(responseMessage);
 
       sendMessageToUser(savedMessage.getReceiver().getUserId(), jsonMessage);
-      sendMessageToUser(savedMessage.getSender().getUserId(), jsonMessage);
+//      sendMessageToUser(savedMessage.getSender().getUserId(), jsonMessage);
 
     } catch (Exception e) {
       log.error(e.getMessage());
     }
   }
 
-//  @Override
-//  public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-//    Map<String, String> params = getQueryParams(session);
-//    String userIdStr = params.get("userId");
-//
-//    if (userIdStr == null || userIdStr.isEmpty() || userIdStr.equals("undefined")) {
-//      log.error("❌ WebSocket 연결 오류: userId가 올바르지 않습니다. (roomId: {})", userIdStr);
-//      session.close();
-//      return;
-//    }
-//
-//    try {
-//      Long userId = Long.parseLong(userIdStr);
-//      log.info("✅ 채팅방 {} 연결 성공", userId);
-//
-//      chatService.markMessagesAsRead(userId);
-//
-//      userSessions.put(userId, session);
-//    } catch (NumberFormatException e) {
-//      log.error("❌ roomId 변환 오류: {}", userIdStr);
-//      session.close();
-//    }
-//  }
 @Override
 public void afterConnectionEstablished(WebSocketSession session) throws Exception {
   Map<String, String> params = getQueryParams(session);

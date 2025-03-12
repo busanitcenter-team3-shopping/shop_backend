@@ -1,5 +1,6 @@
 package com.secure.shopbackend.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +17,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+//@JsonIgnoreProperties({"product"})
 public class ChatRoom {
 
   @Id
@@ -42,7 +44,7 @@ public class ChatRoom {
   private User user1;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user2_id", nullable = true)
+  @JoinColumn(name = "user2_id", nullable = false)
   private User user2;
 
   public boolean isSameRoom(User u1, User u2, Product product) {

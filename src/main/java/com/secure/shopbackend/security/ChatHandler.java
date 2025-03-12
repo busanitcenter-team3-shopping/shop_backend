@@ -82,7 +82,7 @@ public class ChatHandler extends TextWebSocketHandler {
       ChatMessage responseMessage = ChatMessage.fromEntity(savedMessage);
       String jsonMessage = objectMapper.writeValueAsString(responseMessage);
 
-      sendMessageToUser(savedMessage.getReceiver().getUserId(), jsonMessage);
+      sendMessageToBothUsers( savedMessage.getSender().getUserId(), savedMessage.getReceiver().getUserId(), jsonMessage);
 //      sendMessageToUser(savedMessage.getSender().getUserId(), jsonMessage);
 
     } catch (Exception e) {
@@ -136,13 +136,22 @@ public void afterConnectionEstablished(WebSocketSession session) throws Exceptio
             .collect(Collectors.toMap(pair->pair[0],pair->pair[1]));
   }
 
-  public void sendMessageToUser(Long userId, String message) throws Exception {
-    WebSocketSession session = userSessions.get(userId);
-    if (session != null && session.isOpen()) {
-      session.sendMessage(new TextMessage(message));
-      log.info("📩 메시지 전송됨 → 수신자 ID: {}", userId);
+  public void sendMessageToBothUsers(Long senderId, Long receiverId, String message) throws Exception {
+    WebSocketSession senderSession = userSessions.get(senderId);
+    WebSocketSession receiverSession = userSessions.get(receiverId);
+
+//    if (senderSession != null && senderSession.isOpen()) {
+//      senderSession.sendMessage(new TextMessage(message));
+//      log.info("📩 메시지 전송됨 → 발신자 ID: {}", senderId);
+//    } else {
+//      log.warn("⚠ WebSocket 세션 없음 - 발신자 ID: {}", senderId);
+//    }
+
+    if (receiverSession != null && receiverSession.isOpen()) {
+      receiverSession.sendMessage(new TextMessage(message));
+      log.info("📩 받은 사람에게 메시지 전송 완료 → ID: {}", receiverId);
     } else {
-      log.warn("⚠ WebSocket 세션 없음 - 수신자 ID: {}", userId);
+      log.warn("⚠ 받은 사람 세션 없음 - ID: {}", receiverId);
     }
   }
 }

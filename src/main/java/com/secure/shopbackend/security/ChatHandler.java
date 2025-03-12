@@ -90,29 +90,57 @@ public class ChatHandler extends TextWebSocketHandler {
     }
   }
 
-  @Override
-  public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-    Map<String, String> params = getQueryParams(session);
-    String userIdStr = params.get("userId");
+//  @Override
+//  public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+//    Map<String, String> params = getQueryParams(session);
+//    String userIdStr = params.get("userId");
+//
+//    if (userIdStr == null || userIdStr.isEmpty() || userIdStr.equals("undefined")) {
+//      log.error("❌ WebSocket 연결 오류: userId가 올바르지 않습니다. (roomId: {})", userIdStr);
+//      session.close();
+//      return;
+//    }
+//
+//    try {
+//      Long userId = Long.parseLong(userIdStr);
+//      log.info("✅ 채팅방 {} 연결 성공", userId);
+//
+//      chatService.markMessagesAsRead(userId);
+//
+//      userSessions.put(userId, session);
+//    } catch (NumberFormatException e) {
+//      log.error("❌ roomId 변환 오류: {}", userIdStr);
+//      session.close();
+//    }
+//  }
+@Override
+public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+  Map<String, String> params = getQueryParams(session);
+  String userIdStr = params.get("userId");
+  String chatRoomIdStr = params.get("chatRoomId"); // chatRoomId도 가져오기
 
-    if (userIdStr == null || userIdStr.isEmpty() || userIdStr.equals("undefined")) {
-      log.error("❌ WebSocket 연결 오류: userId가 올바르지 않습니다. (roomId: {})", userIdStr);
-      session.close();
-      return;
-    }
-
-    try {
-      Long userId = Long.parseLong(userIdStr);
-      log.info("✅ 채팅방 {} 연결 성공", userId);
-
-      chatService.markMessagesAsRead(userId);
-
-      userSessions.put(userId, session);
-    } catch (NumberFormatException e) {
-      log.error("❌ roomId 변환 오류: {}", userIdStr);
-      session.close();
-    }
+  if (userIdStr == null || userIdStr.isEmpty() || userIdStr.equals("undefined") || chatRoomIdStr == null || chatRoomIdStr.isEmpty()) {
+    log.error("❌ WebSocket 연결 오류: userId 또는 chatRoomId가 올바르지 않습니다. (userId: {}, chatRoomId: {})", userIdStr, chatRoomIdStr);
+    session.close();
+    return;
   }
+
+  try {
+    Long userId = Long.parseLong(userIdStr);
+    Long chatRoomId = Long.parseLong(chatRoomIdStr); // chatRoomId 파싱
+
+    log.info("✅ 채팅방 {} 연결 성공", userId);
+
+    // chatRoomId와 userId를 모두 전달
+    chatService.markMessagesAsRead(userId, chatRoomId);
+
+    userSessions.put(userId, session);
+  } catch (NumberFormatException e) {
+    log.error("❌ 변환 오류: userId={}, chatRoomId={}", userIdStr, chatRoomIdStr);
+    session.close();
+  }
+}
+
 
 
 

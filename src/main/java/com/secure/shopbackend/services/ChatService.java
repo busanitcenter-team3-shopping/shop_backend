@@ -69,7 +69,7 @@ public class ChatService {
 
     public List<ChatMessage> getMessagesByChatRoomId(Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(()-> new RuntimeException("ChatRoom not found"));
-
+        System.out.println("챗방:"+chatRoom);
         return messageRepository.findByChatRoom(chatRoom);
     }
 

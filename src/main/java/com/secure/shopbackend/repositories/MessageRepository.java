@@ -17,8 +17,8 @@ public interface MessageRepository extends JpaRepository<ChatMessage, Long> {
 
     @Transactional
     @Modifying
-    @Query("UPDATE ChatMessage SET isRead = true WHERE receiver.userId = :userId AND isRead = false ")
-    int markMessagesAsRead(Long userId);
+    @Query("UPDATE ChatMessage m SET m.isRead = true WHERE m.receiver.userId = :userId AND m.chatRoom.chatRoomId = :chatRoomId AND m.isRead = false")
+    int markMessagesAsRead(@Param("userId") Long userId, @Param("chatRoomId") Long chatRoomId);
 
     // 채팅방 하나의 읽지않은 메서드 수
     @Query("SELECT COUNT(*) FROM ChatMessage WHERE chatRoom.chatRoomId = :chatRoomId AND receiver.userId = :userId AND isRead = false")

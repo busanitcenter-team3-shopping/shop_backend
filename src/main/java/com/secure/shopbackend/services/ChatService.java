@@ -79,8 +79,8 @@ public class ChatService {
     }
 
     @Transactional
-    public void markMessagesAsRead(Long chatRoomId) {
-        int updatedCount = messageRepository.markMessagesAsRead(chatRoomId);
+    public void markMessagesAsRead(Long userId, Long chatRoomId) {
+        int updatedCount = messageRepository.markMessagesAsRead(userId, chatRoomId);
     }
 
     // 방 안읽은 메시지 개수

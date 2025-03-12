@@ -21,6 +21,7 @@ public class ChatService {
     private final ProductRepository productRepository;
 
     //메시지 저장
+    @Transactional
     public ChatMessage saveMessage (ChatMessage chatMessage) {
 
         return messageRepository.save(chatMessage);

@@ -20,4 +20,5 @@ public class SellerReviewResponseDto {
     private String reviewContent;
     private Long productId;
     private String productTitle;
+    private String image;
 }

@@ -82,37 +82,42 @@ public class ChatHandler extends TextWebSocketHandler {
       ChatMessage responseMessage = ChatMessage.fromEntity(savedMessage);
       String jsonMessage = objectMapper.writeValueAsString(responseMessage);
 
-      sendMessageToUser(savedMessage.getReceiver().getUserId(), jsonMessage);
-      sendMessageToUser(savedMessage.getSender().getUserId(), jsonMessage);
+      sendMessageToBothUsers( savedMessage.getSender().getUserId(), savedMessage.getReceiver().getUserId(), jsonMessage);
+//      sendMessageToUser(savedMessage.getSender().getUserId(), jsonMessage);
 
     } catch (Exception e) {
       log.error(e.getMessage());
     }
   }
 
-  @Override
-  public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-    Map<String, String> params = getQueryParams(session);
-    String userIdStr = params.get("userId");
+@Override
+public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+  Map<String, String> params = getQueryParams(session);
+  String userIdStr = params.get("userId");
+  String chatRoomIdStr = params.get("chatRoomId"); // chatRoomId도 가져오기
 
-    if (userIdStr == null || userIdStr.isEmpty() || userIdStr.equals("undefined")) {
-      log.error("❌ WebSocket 연결 오류: userId가 올바르지 않습니다. (roomId: {})", userIdStr);
-      session.close();
-      return;
-    }
-
-    try {
-      Long userId = Long.parseLong(userIdStr);
-      log.info("✅ 채팅방 {} 연결 성공", userId);
-
-      chatService.markMessagesAsRead(userId);
-
-      userSessions.put(userId, session);
-    } catch (NumberFormatException e) {
-      log.error("❌ roomId 변환 오류: {}", userIdStr);
-      session.close();
-    }
+  if (userIdStr == null || userIdStr.isEmpty() || userIdStr.equals("undefined") || chatRoomIdStr == null || chatRoomIdStr.isEmpty()) {
+    log.error("❌ WebSocket 연결 오류: userId 또는 chatRoomId가 올바르지 않습니다. (userId: {}, chatRoomId: {})", userIdStr, chatRoomIdStr);
+    session.close();
+    return;
   }
+
+  try {
+    Long userId = Long.parseLong(userIdStr);
+    Long chatRoomId = Long.parseLong(chatRoomIdStr); // chatRoomId 파싱
+
+    log.info("✅ 채팅방 {} 연결 성공", userId);
+
+    // chatRoomId와 userId를 모두 전달
+    chatService.markMessagesAsRead(userId, chatRoomId);
+
+    userSessions.put(userId, session);
+  } catch (NumberFormatException e) {
+    log.error("❌ 변환 오류: userId={}, chatRoomId={}", userIdStr, chatRoomIdStr);
+    session.close();
+  }
+}
+
 
 
 
@@ -131,13 +136,22 @@ public class ChatHandler extends TextWebSocketHandler {
             .collect(Collectors.toMap(pair->pair[0],pair->pair[1]));
   }
 
-  public void sendMessageToUser(Long userId, String message) throws Exception {
-    WebSocketSession session = userSessions.get(userId);
-    if (session != null && session.isOpen()) {
-      session.sendMessage(new TextMessage(message));
-      log.info("📩 메시지 전송됨 → 수신자 ID: {}", userId);
+  public void sendMessageToBothUsers(Long senderId, Long receiverId, String message) throws Exception {
+    WebSocketSession senderSession = userSessions.get(senderId);
+    WebSocketSession receiverSession = userSessions.get(receiverId);
+
+//    if (senderSession != null && senderSession.isOpen()) {
+//      senderSession.sendMessage(new TextMessage(message));
+//      log.info("📩 메시지 전송됨 → 발신자 ID: {}", senderId);
+//    } else {
+//      log.warn("⚠ WebSocket 세션 없음 - 발신자 ID: {}", senderId);
+//    }
+
+    if (receiverSession != null && receiverSession.isOpen()) {
+      receiverSession.sendMessage(new TextMessage(message));
+      log.info("📩 받은 사람에게 메시지 전송 완료 → ID: {}", receiverId);
     } else {
-      log.warn("⚠ WebSocket 세션 없음 - 수신자 ID: {}", userId);
+      log.warn("⚠ 받은 사람 세션 없음 - ID: {}", receiverId);
     }
   }
 }

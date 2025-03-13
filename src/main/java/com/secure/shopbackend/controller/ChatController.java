@@ -12,8 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @Log4j2
@@ -28,8 +30,20 @@ public class ChatController {
 
   // 채팅 메시지 불러오기
   @GetMapping("/rooms/{id}/messages")
-  public List<ChatMessage> getMessagesByRoom(@PathVariable Long id) {
-    return chatService.getMessagesByChatRoomId(id);
+  public List<Map<String, Object>> getMessagesByRoom(@PathVariable Long id) {
+    List<ChatMessage> messages = chatService.getMessagesByChatRoomId(id);
+
+    return messages.stream().map(msg -> {
+      Map<String, Object> messageData = new HashMap<>();
+      messageData.put("messageId", msg.getMessageId());
+      messageData.put("chatRoomId", msg.getChatRoom().getChatRoomId());
+      messageData.put("senderId", msg.getSender().getUserId()); // senderId 추가
+      messageData.put("receiverId", msg.getReceiver().getUserId()); // receiverId 추가
+      messageData.put("content", msg.getContent());
+      messageData.put("timestamp", msg.getTimestamp());
+      messageData.put("isRead", msg.getIsRead());
+      return messageData;
+    }).collect(Collectors.toList());
   }
 
   @PostMapping("/rooms")
@@ -58,6 +72,22 @@ public class ChatController {
   public ResponseEntity<ChatRoom> getRoomDetails(@PathVariable Long id){
     ChatRoom room = chatService.getChatRoomDetails(id);
     return ResponseEntity.ok(room);
+  }
+
+  // 하나의 채팅방에 읽지않은 메시지 개수
+  @GetMapping("/rooms/{id}/unread-count")
+  public ResponseEntity<Integer> getUnreadMessageCount(@PathVariable Long id, @RequestParam Long userId) {
+    int unreadCount = chatService.getUnreadMessageCount(id, userId);
+    return ResponseEntity.ok(unreadCount);
+  }
+
+
+  //한 유저의 전체 채팅방 읽지 않은 메시지 개수
+  @GetMapping("/rooms/unread")
+  public ResponseEntity<Integer> getUnreadAllMessagesCount(@RequestParam Long userId) {
+    int unreadCount = chatService.getUnreadAllMessagesCount(userId);
+    return ResponseEntity.ok(unreadCount);
+
   }
 
   //상품 판매

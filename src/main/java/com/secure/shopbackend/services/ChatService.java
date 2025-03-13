@@ -21,6 +21,7 @@ public class ChatService {
     private final ProductRepository productRepository;
 
     //메시지 저장
+    @Transactional
     public ChatMessage saveMessage (ChatMessage chatMessage) {
 
         return messageRepository.save(chatMessage);
@@ -68,7 +69,7 @@ public class ChatService {
 
     public List<ChatMessage> getMessagesByChatRoomId(Long chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(()-> new RuntimeException("ChatRoom not found"));
-
+        System.out.println("챗방:"+chatRoom);
         return messageRepository.findByChatRoom(chatRoom);
     }
 
@@ -79,7 +80,17 @@ public class ChatService {
     }
 
     @Transactional
-    public void markMessagesAsRead(Long chatRoomId) {
-        int updatedCount = messageRepository.markMessagesAsRead(chatRoomId);
+    public void markMessagesAsRead(Long userId, Long chatRoomId) {
+        int updatedCount = messageRepository.markMessagesAsRead(userId, chatRoomId);
+    }
+
+    // 방 안읽은 메시지 개수
+    public int getUnreadMessageCount(Long chatRoomId, Long userId) {
+        return messageRepository.countRead(chatRoomId, userId);
+    }
+    
+    // 전체 방 읽지 않은 메시지 개수
+    public int getUnreadAllMessagesCount(Long userId) {
+        return messageRepository.countUnreadALLMessages(userId);
     }
 }

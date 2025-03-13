@@ -12,4 +12,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
 
     // 특정 유저와 상품으로 구매 목록 찾기
     Purchase findByUserAndProduct_ProductId(User user, Long productId);
+
+    // 판매자 기준으로 구매 내역(판매 내역) 조회
+    List<Purchase> findByProductUserUserId(Long sellerId);
 }

@@ -10,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -56,5 +57,10 @@ public class Review {
     //review_type : 리뷰 타입(구매자>판매자, 판매자>구매자) 구분용
     @Column(name = "review_type")
     private String reviewType;
+
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ReviewImage> reviewImages;
+
 
 }

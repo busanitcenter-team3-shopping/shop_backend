@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,22 +52,32 @@ public class PurchaseService {
     public List<PurchaseResponseDto> getPurchasesForUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // purchase 엔티티 목록 조회
         List<Purchase> purchases = purchaseRepository.findAllByUser(user);
+        List<PurchaseResponseDto> dtoList = new ArrayList<>();
 
-        // 엔티티 -> DTO 변환
-        return purchases.stream().map(purchase -> {
+        for (Purchase purchase : purchases) {
             PurchaseResponseDto dto = new PurchaseResponseDto();
             dto.setPurchaseId(purchase.getPurchaseId());
             dto.setProduct(purchase.getProduct());
             dto.setUserId(purchase.getUser().getUserId());
-            dto.setAlreadyReviewed(
-                    purchase.getReviews() != null && !purchase.getReviews().isEmpty()
-            );
-            return dto;
-        }).collect(Collectors.toList());
+
+            // 리뷰 작성 여부 체크
+            boolean alreadyReviewed = false;
+            boolean sellerAlreadyReviewed = false;
+            if (purchase.getReviews() != null) {
+                for (Review review : purchase.getReviews()) {
+                    if ("BUYER_TO_SELLER".equals(review.getReviewType())) {
+                        alreadyReviewed = true;
+                    } else if ("SELLER_TO_BUYER".equals(review.getReviewType())) {
+                        sellerAlreadyReviewed = true;
+                    }
+                }
+            }
+            dto.setAlreadyReviewed(alreadyReviewed);
+            dto.setSellerAlreadyReviewed(sellerAlreadyReviewed);
+            dtoList.add(dto);
+        }
+        return dtoList;
     }
-    
 
 }

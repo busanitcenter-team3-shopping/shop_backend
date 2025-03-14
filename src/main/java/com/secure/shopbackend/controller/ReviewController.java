@@ -21,7 +21,7 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
-    // 이미지가 없는 경우 josn 방식
+    // 이미지가 없는 경우 (JSON 방식) : 기존 로직 그대로 사용
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createReviewJson(
             @RequestBody @Valid Review reviewDto,
@@ -32,7 +32,7 @@ public class ReviewController {
             return ResponseEntity.badRequest().body(error);
         }
         try {
-            // 이미지 파일이 없으므로 null 전달
+            // 이미지 파일 없이 리뷰 등록 (리뷰 이미지 관련 필드는 null로 처리됨)
             Review createdReview = reviewService.createReview(reviewDto, null);
             return ResponseEntity.ok(createdReview);
         } catch (Exception e) {
@@ -41,7 +41,7 @@ public class ReviewController {
         }
     }
 
-    // 이미지 첨부시 multipart 방식
+    // 이미지 첨부시 (Multipart 방식)
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createReviewMultipart(
             @RequestPart("review") @Valid Review reviewDto,
@@ -53,6 +53,7 @@ public class ReviewController {
             return ResponseEntity.badRequest().body(error);
         }
         try {
+            // 내부 서비스 로직에서 리뷰 이미지(ReviewImage 엔티티)로 저장하도록 처리
             Review createdReview = reviewService.createReview(reviewDto, imageFile);
             return ResponseEntity.ok(createdReview);
         } catch (Exception e) {
@@ -61,29 +62,29 @@ public class ReviewController {
         }
     }
 
-    // 리뷰 수정
-    @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateReview(@RequestBody Review review, @PathVariable Long id) {
-        try {
-            Review updatedReview = reviewService.updateReview(id, review);
-            return ResponseEntity.ok(updatedReview);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+//    // 리뷰 수정
+//    @PutMapping("/update/{id}")
+//    public ResponseEntity<?> updateReview(@RequestBody Review review, @PathVariable Long id) {
+//        try {
+//            Review updatedReview = reviewService.updateReview(id, review);
+//            return ResponseEntity.ok(updatedReview);
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
+//
+//    // 리뷰 삭제
+//    @DeleteMapping("/delete/{id}")
+//    public ResponseEntity<?> deleteReview(@PathVariable Long id) {
+//        try {
+//            reviewService.deleteReview(id);
+//            return ResponseEntity.ok().build();
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
 
-    // 리뷰 삭제
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteReview(@PathVariable Long id) {
-        try {
-            reviewService.deleteReview(id);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-
+    // 특정 유저의 리뷰 조회 (DTO로 반환; 내부에서 새 ReviewImage 정보를 포함하여 URL 생성)
     @GetMapping("/for/{userId}")
     public ResponseEntity<?> getReviewsForUser(@PathVariable Long userId) {
         try {
@@ -93,9 +94,4 @@ public class ReviewController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-
 }
-
-
-

@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 public class ChatHandler extends TextWebSocketHandler {
 
   private static Map<Long, WebSocketSession> userSessions = new ConcurrentHashMap<>();
+  private final Map<Long, Long> userChatRooms = new ConcurrentHashMap<>();
+  private final Map<Long, List<String>> offlineMessages = new ConcurrentHashMap<>();
 
   private final ChatService chatService;
 
@@ -65,6 +67,10 @@ public class ChatHandler extends TextWebSocketHandler {
         log.error("❌ 메시지 전송 오류: senderId 또는 chatRoomId 또는 receiverId 가 null입니다.");
         return;
       }
+      // 유저가 현재 채팅방에 있는지 확인
+      boolean isReceiverInRoom = userChatRooms.containsKey(receiverId)
+              && userChatRooms.get(receiverId) != null
+              && userChatRooms.get(receiverId).equals(chatRoomId);
 
       User sender = userRepository.findById(senderId).orElseThrow(()-> new RuntimeException("Sender not found"));
       User receiver = userRepository.findById(receiverId).orElseThrow(()-> new RuntimeException("Receiver not found"));
@@ -75,7 +81,7 @@ public class ChatHandler extends TextWebSocketHandler {
             chatMessage.setContent(content);
             chatMessage.setChatRoom(chatRoomRepository.findById(chatRoomId).orElseThrow(()-> new RuntimeException("ChatRoom not found")));
             chatMessage.setTimestamp(LocalDateTime.now());
-            chatMessage.setIsRead(false);
+            chatMessage.setIsRead(isReceiverInRoom);
 
             ChatMessage savedMessage = chatService.saveMessage(chatMessage);
 
@@ -86,8 +92,12 @@ public class ChatHandler extends TextWebSocketHandler {
       response.put("unreadCount", receiverUnreadCount);
       response.put("chatRoomId", savedMessage.getChatRoom().getChatRoomId());
 
+      log.info("📩 메시지 전송 - ID: {}, isRead: {}", savedMessage.getMessageId(), savedMessage.getIsRead());
+
 //      ChatMessage responseMessage = ChatMessage.fromEntity(savedMessage);
       String jsonMessage = objectMapper.writeValueAsString(response);
+
+      log.info("📩 WebSocket 메시지 전송 - 대상 유저 ID: {}, 내용: {}", receiverId, jsonMessage);
 
       sendMessageToBothUsers( savedMessage.getSender().getUserId(), savedMessage.getReceiver().getUserId(), jsonMessage);
 //      sendMessageToUser(savedMessage.getSender().getUserId(), jsonMessage);
@@ -116,15 +126,30 @@ public void afterConnectionEstablished(WebSocketSession session) throws Exceptio
     log.info("✅ WebSocket 연결 성공 - 유저 ID: {}, 채팅방 ID: {}", userId, chatRoomId);
 
     if (userSessions.containsKey(userId)) {
-      log.warn("⚠ 기존 WebSocket 세션 존재 → 기존 연결 유지 (유저 ID: {})", userId);
-      return;
+      userSessions.get(userId).close();
     }
-
     userSessions.put(userId, session);
 
     if (chatRoomId != null) {
+      userChatRooms.put(userId, chatRoomId);
+      chatService.setUserChatRoom(userId, chatRoomId);  // ✅ chatRoomId가 null이 아닐 때만 실행
       chatService.markMessagesAsRead(userId, chatRoomId);
+    } else {
+      userChatRooms.remove(userId);  // global이면 채팅방 정보 삭제
+      log.info("🌍 유저 {}는 global 상태입니다.", userId);
     }
+
+    log.info("✅ WebSocket 세션 저장 완료 - userSessions: {}", userSessions.keySet());
+
+    if (offlineMessages.containsKey(userId)) {
+      List<String> messages = new ArrayList<>(offlineMessages.get(userId)); // 리스트 복사
+      offlineMessages.remove(userId); // 삭제
+      for (String msg : messages) {
+        session.sendMessage(new TextMessage(msg));
+      }
+      log.info("📩 유저 {}에게 저장된 오프라인 메시지 전송 완료", userId);
+    }
+
 
   } catch (NumberFormatException e) {
     log.error("❌ 변환 오류: userId={}", userIdStr);
@@ -135,8 +160,21 @@ public void afterConnectionEstablished(WebSocketSession session) throws Exceptio
 
   @Override
   public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-    userSessions.values().removeIf(s -> s.equals(session));
-    log.info(session + "클라이언트 접속 해제");
+    Long userId = null;
+
+    // 🚀 userSessions에서 해당 세션을 가진 userId 찾기
+    for (Map.Entry<Long, WebSocketSession> entry : userSessions.entrySet()) {
+      if (entry.getValue().equals(session)) {
+        userId = entry.getKey();
+        break;
+      }
+    }
+
+    if (userId != null) {
+      userSessions.remove(userId);
+      userChatRooms.remove(userId); // 유저가 채팅방을 나가면 상태 제거
+      log.info("❌ WebSocket 연결 종료 - 유저 ID: {}", userId);
+    }
   }
 
   private Map<String, String> getQueryParams(WebSocketSession session) {
@@ -158,9 +196,23 @@ public void afterConnectionEstablished(WebSocketSession session) throws Exceptio
 
     if (receiverSession != null && receiverSession.isOpen()) {
       receiverSession.sendMessage(new TextMessage(message));
-      log.info("📩 받은 사람에게 메시지 전송 완료 → ID: {}", receiverId);
+      log.info("📩 메시지 전송 완료 → 수신자 ID: {}", receiverId);
     } else {
-      log.warn("⚠ 받은 사람 세션 없음 - ID: {}", receiverId);
+      log.warn("⚠ 받은 사람 세션 없음 - 오프라인 메시지 저장 (ID: {})", receiverId);
+      saveOfflineMessage(receiverId, message);
     }
+  }
+
+  private void saveOfflineMessage(Long receiverId, String message) {
+    offlineMessages.computeIfAbsent(receiverId, k -> new ArrayList<>()).add(message);
+    log.info("📩 받은 사람({})이 오프라인 상태 - 메시지 저장됨", receiverId);
+  }
+
+  private Long getUserIdFromSession(WebSocketSession session) {
+    Object userId = session.getAttributes().get("userId");
+    if (userId instanceof Long) {
+      return (Long) userId;
+    }
+    return null;
   }
 }

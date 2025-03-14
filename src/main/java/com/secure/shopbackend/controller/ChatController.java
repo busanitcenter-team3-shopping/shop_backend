@@ -104,4 +104,10 @@ public class ChatController {
     Long buyerId = requestBody.get("buyerId");
     return purchaseService.completePurchase(chatRoomId, buyerId);
   }
+
+  @GetMapping("/rooms/{chatRoomId}/isUserInRoom")
+  public ResponseEntity<Boolean> isUserInRoom(@PathVariable Long chatRoomId, @RequestParam Long userId) {
+    boolean isInRoom = chatService.isUserInRoom(userId, chatRoomId);
+    return ResponseEntity.ok(isInRoom);
+  }
 }

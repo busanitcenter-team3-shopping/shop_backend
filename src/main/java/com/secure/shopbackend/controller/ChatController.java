@@ -90,6 +90,12 @@ public class ChatController {
 
   }
 
+  @PostMapping("/rooms/{chatRoomId}/mark-as-read")
+  public ResponseEntity<?> markMessagesAsRead(@PathVariable Long chatRoomId, @RequestParam Long userId) {
+    chatService.markMessagesAsRead(chatRoomId, userId);
+    return ResponseEntity.ok().build();
+  }
+
   //상품 판매
   @PostMapping("/purchase/{chatRoomId}")
   public ResponseEntity<?> completePurchase(

@@ -2,6 +2,7 @@ package com.secure.shopbackend.security;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.secure.shopbackend.dtos.ChatMessage;
 import com.secure.shopbackend.dtos.ChatRoom;
@@ -78,9 +79,15 @@ public class ChatHandler extends TextWebSocketHandler {
 
             ChatMessage savedMessage = chatService.saveMessage(chatMessage);
 
+      int receiverUnreadCount = chatService.getUnreadAllMessagesCount(receiverId);
 
-      ChatMessage responseMessage = ChatMessage.fromEntity(savedMessage);
-      String jsonMessage = objectMapper.writeValueAsString(responseMessage);
+      ObjectNode response = objectMapper.createObjectNode();
+      response.putPOJO("message", ChatMessage.fromEntity(savedMessage));
+      response.put("unreadCount", receiverUnreadCount);
+      response.put("chatRoomId", savedMessage.getChatRoom().getChatRoomId());
+
+//      ChatMessage responseMessage = ChatMessage.fromEntity(savedMessage);
+      String jsonMessage = objectMapper.writeValueAsString(response);
 
       sendMessageToBothUsers( savedMessage.getSender().getUserId(), savedMessage.getReceiver().getUserId(), jsonMessage);
 //      sendMessageToUser(savedMessage.getSender().getUserId(), jsonMessage);
@@ -104,21 +111,26 @@ public void afterConnectionEstablished(WebSocketSession session) throws Exceptio
 
   try {
     Long userId = Long.parseLong(userIdStr);
-    Long chatRoomId = Long.parseLong(chatRoomIdStr); // chatRoomId 파싱
+    Long chatRoomId = chatRoomIdStr.equals("global") ? null : Long.parseLong(chatRoomIdStr);
 
-    log.info("✅ 채팅방 {} 연결 성공", userId);
+    log.info("✅ WebSocket 연결 성공 - 유저 ID: {}, 채팅방 ID: {}", userId, chatRoomId);
 
-    // chatRoomId와 userId를 모두 전달
-    chatService.markMessagesAsRead(userId, chatRoomId);
+    if (userSessions.containsKey(userId)) {
+      log.warn("⚠ 기존 WebSocket 세션 존재 → 기존 연결 유지 (유저 ID: {})", userId);
+      return;
+    }
 
     userSessions.put(userId, session);
+
+    if (chatRoomId != null) {
+      chatService.markMessagesAsRead(userId, chatRoomId);
+    }
+
   } catch (NumberFormatException e) {
-    log.error("❌ 변환 오류: userId={}, chatRoomId={}", userIdStr, chatRoomIdStr);
+    log.error("❌ 변환 오류: userId={}", userIdStr);
     session.close();
   }
 }
-
-
 
 
   @Override
@@ -130,22 +142,19 @@ public void afterConnectionEstablished(WebSocketSession session) throws Exceptio
   private Map<String, String> getQueryParams(WebSocketSession session) {
     String query = session.getUri().getQuery();
     if (query == null) return Collections.emptyMap();
+    System.out.println(query);
 
     return Arrays.stream(query.split("&"))
-            .map(param -> param.split("="))
-            .collect(Collectors.toMap(pair->pair[0],pair->pair[1]));
+            .map(param -> param.split("=", 2))
+            .collect(Collectors.toMap(
+                    pair -> pair[0], // key
+                    pair -> pair.length > 1 && !pair[1].isEmpty() ? pair[1] : null // value가 없으면 빈 문자열로 처리
+            ));
   }
 
   public void sendMessageToBothUsers(Long senderId, Long receiverId, String message) throws Exception {
     WebSocketSession senderSession = userSessions.get(senderId);
     WebSocketSession receiverSession = userSessions.get(receiverId);
-
-//    if (senderSession != null && senderSession.isOpen()) {
-//      senderSession.sendMessage(new TextMessage(message));
-//      log.info("📩 메시지 전송됨 → 발신자 ID: {}", senderId);
-//    } else {
-//      log.warn("⚠ WebSocket 세션 없음 - 발신자 ID: {}", senderId);
-//    }
 
     if (receiverSession != null && receiverSession.isOpen()) {
       receiverSession.sendMessage(new TextMessage(message));

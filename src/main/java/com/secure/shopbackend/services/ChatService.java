@@ -5,6 +5,7 @@ import com.secure.shopbackend.repositories.*;
 import com.secure.shopbackend.security.services.UserDetailsImpl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final MessageRepository messageRepository;
@@ -82,6 +84,7 @@ public class ChatService {
     @Transactional
     public void markMessagesAsRead(Long userId, Long chatRoomId) {
         int updatedCount = messageRepository.markMessagesAsRead(userId, chatRoomId);
+        log.info("✅ {}개의 메시지를 읽음 처리함 (userId: {}, chatRoomId: {})", updatedCount, userId, chatRoomId);
     }
 
     // 방 안읽은 메시지 개수

@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +23,8 @@ public class ChatService {
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+
+    private final Map<Long, Long> userChatRoomMap = new ConcurrentHashMap<>();
 
     //메시지 저장
     @Transactional
@@ -95,5 +99,26 @@ public class ChatService {
     // 전체 방 읽지 않은 메시지 개수
     public int getUnreadAllMessagesCount(Long userId) {
         return messageRepository.countUnreadALLMessages(userId);
+    }
+
+    public void setUserChatRoom(Long userId, Long chatRoomId) {
+        userChatRoomMap.put(userId, chatRoomId);
+    }
+
+    public void removeUserFromRoom(Long userId) {
+        userChatRoomMap.remove(userId);
+    }
+
+    public boolean isUserInRoom(Long userId, Long chatRoomId) {
+        Long activeChatRoomId = userChatRoomMap.get(userId);
+
+        if (activeChatRoomId == null || activeChatRoomId == -1) {
+            return false;
+        }
+
+        boolean isInRoom = activeChatRoomId.equals(chatRoomId);
+        log.info("🔍 유저 {}가 채팅방 {}에 있는가? {}", userId, chatRoomId, isInRoom);
+
+        return isInRoom;
     }
 }

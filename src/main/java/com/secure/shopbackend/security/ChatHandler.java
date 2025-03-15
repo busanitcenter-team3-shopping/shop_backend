@@ -58,53 +58,90 @@ public class ChatHandler extends TextWebSocketHandler {
       objectMapper.registerModule(new JavaTimeModule());
       JsonNode jsonNode = objectMapper.readTree(payload);
 
-      Long senderId = jsonNode.get("senderId").asLong();
-      Long receiverId = jsonNode.get("receiverId").asLong();
-      Long chatRoomId = jsonNode.get("chatRoomId").asLong();
-      String content = jsonNode.get("content").asText();
+      String eventType = jsonNode.get("event").asText();
 
-      if (senderId == null || chatRoomId == null || receiverId == null) {
-        log.error("❌ 메시지 전송 오류: senderId 또는 chatRoomId 또는 receiverId 가 null입니다.");
-        return;
-      }
-      // 유저가 현재 채팅방에 있는지 확인
-      boolean isReceiverInRoom = userChatRooms.containsKey(receiverId)
-              && userChatRooms.get(receiverId) != null
-              && userChatRooms.get(receiverId).equals(chatRoomId);
+      if("sendMessage".equals(eventType)) {
+        Long senderId = jsonNode.get("senderId").asLong();
+        Long receiverId = jsonNode.get("receiverId").asLong();
+        Long chatRoomId = jsonNode.get("chatRoomId").asLong();
+        String content = jsonNode.get("content").asText();
 
-      User sender = userRepository.findById(senderId).orElseThrow(()-> new RuntimeException("Sender not found"));
-      User receiver = userRepository.findById(receiverId).orElseThrow(()-> new RuntimeException("Receiver not found"));
+        if (senderId == null || chatRoomId == null || receiverId == null) {
+          log.error("❌ 메시지 전송 오류: senderId 또는 chatRoomId 또는 receiverId 가 null입니다.");
+          return;
+        }
+        // 유저가 현재 채팅방에 있는지 확인
+        boolean isReceiverInRoom = userChatRooms.containsKey(receiverId)
+                && userChatRooms.get(receiverId) != null
+                && userChatRooms.get(receiverId).equals(chatRoomId);
+
+        User sender = userRepository.findById(senderId).orElseThrow(()-> new RuntimeException("Sender not found"));
+        User receiver = userRepository.findById(receiverId).orElseThrow(()-> new RuntimeException("Receiver not found"));
 
         ChatMessage chatMessage = new ChatMessage();
-            chatMessage.setSender(sender);
-            chatMessage.setReceiver(receiver);
-            chatMessage.setContent(content);
-            chatMessage.setChatRoom(chatRoomRepository.findById(chatRoomId).orElseThrow(()-> new RuntimeException("ChatRoom not found")));
-            chatMessage.setTimestamp(LocalDateTime.now());
-            chatMessage.setIsRead(isReceiverInRoom);
+        chatMessage.setSender(sender);
+        chatMessage.setReceiver(receiver);
+        chatMessage.setContent(content);
+        chatMessage.setChatRoom(chatRoomRepository.findById(chatRoomId).orElseThrow(()-> new RuntimeException("ChatRoom not found")));
+        chatMessage.setTimestamp(LocalDateTime.now());
+        chatMessage.setIsRead(isReceiverInRoom);
 
-            ChatMessage savedMessage = chatService.saveMessage(chatMessage);
+        ChatMessage savedMessage = chatService.saveMessage(chatMessage);
 
-      int receiverUnreadCount = chatService.getUnreadAllMessagesCount(receiverId);
+        int receiverUnreadCount = chatService.getUnreadAllMessagesCount(receiverId);
 
-      ObjectNode response = objectMapper.createObjectNode();
-      response.putPOJO("message", ChatMessage.fromEntity(savedMessage));
-      response.put("unreadCount", receiverUnreadCount);
-      response.put("chatRoomId", savedMessage.getChatRoom().getChatRoomId());
+        ObjectNode response = objectMapper.createObjectNode();
+        response.putPOJO("message", ChatMessage.fromEntity(savedMessage));
+        response.put("unreadCount", receiverUnreadCount);
+        response.put("chatRoomId", savedMessage.getChatRoom().getChatRoomId());
 
-      log.info("📩 메시지 전송 - ID: {}, isRead: {}", savedMessage.getMessageId(), savedMessage.getIsRead());
+        log.info("📩 메시지 전송 - ID: {}, isRead: {}", savedMessage.getMessageId(), savedMessage.getIsRead());
 
 //      ChatMessage responseMessage = ChatMessage.fromEntity(savedMessage);
-      String jsonMessage = objectMapper.writeValueAsString(response);
+        String jsonMessage = objectMapper.writeValueAsString(response);
 
-      log.info("📩 WebSocket 메시지 전송 - 대상 유저 ID: {}, 내용: {}", receiverId, jsonMessage);
+        log.info("📩 WebSocket 메시지 전송 - 대상 유저 ID: {}, 내용: {}", receiverId, jsonMessage);
 
-      sendMessageToBothUsers( savedMessage.getSender().getUserId(), savedMessage.getReceiver().getUserId(), jsonMessage);
+        sendMessageToBothUsers( savedMessage.getSender().getUserId(), savedMessage.getReceiver().getUserId(), jsonMessage);
 //      sendMessageToUser(savedMessage.getSender().getUserId(), jsonMessage);
+      } else if("readMessages".equals(eventType)) {
+        Long userId = jsonNode.get("userId").asLong();
+        Long chatRoomId = jsonNode.get("chatRoomId").asLong();
+
+        log.info("사용자가 채팅방 메시지를 읽음", userId, chatRoomId);
+        chatService.markMessagesAsRead(userId, chatRoomId);
+
+        ObjectNode readResponse = objectMapper.createObjectNode();
+        readResponse.put("event", "messageRead");
+        readResponse.put("chatRoomId", chatRoomId);
+        readResponse.put("userId", userId);
+
+        String readJsonMessage = objectMapper.writeValueAsString(readResponse);
+
+        log.info("📩 WebSocket 메시지 읽음 브로드캐스트: {}", readJsonMessage);
+
+        sendMessageToChatRoom(chatRoomId, readJsonMessage);
+      }
+
+
 
     } catch (Exception e) {
       log.error(e.getMessage());
     }
+  }
+  public void sendMessageToChatRoom(Long chatRoomId, String message) throws Exception {
+    List<Long> userIdsInRoom = userChatRooms.entrySet().stream()
+            .filter(entry -> chatRoomId.equals(entry.getValue()))
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toList());
+
+    for (Long userId : userIdsInRoom) {
+      WebSocketSession session = userSessions.get(userId);
+      if (session != null && session.isOpen()) {
+        session.sendMessage(new TextMessage(message));
+      }
+    }
+    log.info("📩 채팅방({})에 있는 모든 유저에게 읽음 처리 전송: {}", chatRoomId, message);
   }
 
 @Override

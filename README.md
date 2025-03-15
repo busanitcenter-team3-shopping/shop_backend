@@ -5,7 +5,7 @@
 ---
 ## 1. 프로젝트 소개
 - **프로젝트 명** : 중고거래
-- **기간** : 25.02.10 ~ {(프론트 : 25.02.10 ~ 25.02.20), (백엔드 : 25.02.21 ~ )}
+- **기간** : 25.02.10 ~ {(프론트 : 25.02.10 ~ 25.02.20), (백엔드 : 25.02.21 ~ 25.03.15)}
 - **인원** : 4人
 - **설계 목적** : 본 중고마켓 프로젝트는 소비자들이 쉽고 안전하게 중고 물품을 거래 할수 있는 플랫폼입니다. 직관적인 사용자 경험과 실시간 소통을 통해 사용자들이 편리하고 신뢰할 수 있는 거래 환경을 누릴 수 있도록 설계 되었습니다. 이 프로젝트는 젊은 팀원들의 창의적 아이디어와 열정을 바탕으로 신뢰와 안전을 최우선으로 하는 중고 거래 생태계를 구축하는 것을 목표로 합니다.
 - **배포** : 
@@ -27,11 +27,11 @@
 <img src="https://github.com/busanitcenter-team3-shopping/shop_backend/blob/dev/src/main/resources/static/img/erd.png?raw=true"/>
 
 ## 4. 사용 기술
-| Language                                                                                                       | Backend                                                                                                                 | Frontend                                                                                             | Database                                                                                                 | Deploy                                                                                                                   | Tool                                                                                                   |
-|----------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
-| <img src="https://img.shields.io/badge/java-007396?style=for-the-badge&logo=java&logoColor=white">             | <img src="https://img.shields.io/badge/spring boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white">         | <img src="https://img.shields.io/badge/REACT-4479A1?style=for-the-badge&logo=react"> |   <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white">    | <img src="https://img.shields.io/badge/AWS Lightsail-232F3E?style=for-the-badge&logo=amazonwebservices&logoColor=white"> | <img src="https://img.shields.io/badge/git-F05032?style=for-the-badge&logo=git&logoColor=white">       |
-| <img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"> | <img src="https://img.shields.io/badge/spring security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white"> |   | <img src="https://img.shields.io/badge/JPA-007396?style=for-the-badge&logo=java&logoColor=white"> |                 | <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white"> |
-
+| Language                                                                                                       | Backend                                                                                                                 | Frontend                                                                                             | Database                                                                                                 | Tool                                                                                                   |
+|----------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| <img src="https://img.shields.io/badge/java-007396?style=for-the-badge&logo=java&logoColor=white">             | <img src="https://img.shields.io/badge/spring boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white">         | <img src="https://img.shields.io/badge/REACT-4479A1?style=for-the-badge&logo=react"> |   <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white">    |  <img src="https://img.shields.io/badge/git-F05032?style=for-the-badge&logo=git&logoColor=white">       |
+| <img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"> | <img src="https://img.shields.io/badge/spring security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white"> |   | <img src="https://img.shields.io/badge/JPA-007396?style=for-the-badge&logo=java&logoColor=white"> |    <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white"> |
+| |  |   | <img src="https://img.shields.io/badge/MyBatis-000000?style=for-the-badge&logo=Mybatis&logoColor=white">||
 
 ## 5. 디펜던시
 - `Spring Web`
@@ -42,5 +42,20 @@
 - `MySQL Driver`
 - `Validation`
 - `Spring Security`
+- `JPA`
+- `jwt`
+- `websocket`
 
 ## 6. 기능 소개
+<details>
+  <summary>회원가입</summary>
+
+- SpringSecurity를 사용하여 회원가입 구현
+  ![회원가입](/src/main/resources/static/mp4/회원가입.mp4)
+</details>
+<details>
+  <summary>로그인</summary>
+
+- SpringSecurity를 사용하여 로그인 구현
+  ![로그인](/src/main/resources/static/mp4/로그인.mp4)
+</details>

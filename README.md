@@ -52,12 +52,55 @@
 <details>
   <summary>회원가입</summary>
 
-- SpringSecurity를 사용하여 회원가입 구현
+- 사용자 입력값을 유효성 검사(front/back) 후 데이터 베이스에 저장
   ![회원가입](https://github.com/busanitcenter-team3-shopping/shop_backend/blob/dev/src/main/resources/static/gif/회원가입.gif)
 </details>
 <details>
   <summary>로그인</summary>
 
-- SpringSecurity를 사용하여 로그인 구현
+- SpringSecurity 를 통해 로그인정보 확인 후 세션으로 저장
   ![로그인](https://github.com/busanitcenter-team3-shopping/shop_backend/blob/dev/src/main/resources/static/gif/로그인.gif)
+</details>
+
+<details>
+  <summary>회원수정</summary>
+
+- 마이페이지 내 회원정보 수정 클릭 시 DB에 저장된 정보를 읽어와서 이름, 패스워드(암호화), 휴대번호 입력한 값을 데이터 베이스에 저장
+  ![회원수정](https://github.com/busanitcenter-team3-shopping/shop_backend/blob/dev/src/main/resources/static/gif/회원수정.gif)
+</details>
+
+<details>
+  <summary>회원탈퇴</summary>
+
+- 마이페이지 내 회원탈퇴 클릭 시 DB에서 회원정보 삭제 후 강제 로그아웃
+  ![회원탈퇴](https://github.com/busanitcenter-team3-shopping/shop_backend/blob/dev/src/main/resources/static/gif/회원탈퇴.gif)
+</details>
+
+### 상품 CRUD 및 부가 기능
+<details>
+  <summary>상품추가</summary>
+
+- SpringSecurity를 사용하여 로그인 구현
+  ![상품추가](https://github.com/busanitcenter-team3-shopping/shop_backend/blob/dev/src/main/resources/static/gif/상품추가.gif)
+</details>
+
+<details>
+  <summary>상품수정</summary>
+
+- SpringSecurity를 사용하여 로그인 구현
+  ![상품수정](https://github.com/busanitcenter-team3-shopping/shop_backend/blob/dev/src/main/resources/static/gif/상품수정.gif)
+</details>
+
+<details>
+  <summary>등록상품 확인</summary>
+
+- SpringSecurity를 사용하여 로그인 구현
+  ![상품확인](https://github.com/busanitcenter-team3-shopping/shop_backend/blob/dev/src/main/resources/static/gif/상품확인.gif)
+</details>
+
+<details>
+  <summary>상품삭제</summary>
+
+- SpringSecurity를 사용하여 로그인 구현
+  ![상품삭제](https://github.com/busanitcenter-team3-shopping/shop_backend/blob/dev/src/main/resources/static/gif/상품삭제.gif)
 </details>

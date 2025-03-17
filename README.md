@@ -36,7 +36,7 @@
 
 ## 4. 요구사항 정의서
 
-<img src="https://github.com/busanitcenter-team3-shopping/shop_backend/blob/dev/src/main/resources/static/img/정의서.png?raw=true"/>
+<img src="https://github.com/busanitcenter-team3-shopping/shop_backend/blob/dev/src/main/resources/static/img/정의서1.png?raw=true"/>
 
 ## 5. 다이어그램
 
